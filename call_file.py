@@ -12,6 +12,8 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
+#lol
+
 class DND_GUI:
     def __init__(self, master):
         self.master = master
