@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 class Ranger(ABC):
-    def __init__(self, level, subclass, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus):
+    def __init__(self, level, subclass, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus, spell_mod, spell_DC):
         self.level = level
         self.subclass = subclass
         self.fighting_style = fighting_style
@@ -12,6 +12,8 @@ class Ranger(ABC):
         self.wis = wis_mod
         self.cha = cha_mod
         self.prof = prof_bonus
+        self.spell_mod = spell_mod
+        self.spell_DC = spell_DC
 
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
@@ -29,6 +31,8 @@ class Ranger(ABC):
             "wis_mod": self.wis,
             "cha_mod": self.cha,
             "prof_bonus": self.prof,
+            "spell_mod": self.spell_mod,
+            "spell_DC": self.spell_DC,
         }
 
     @classmethod
@@ -44,4 +48,6 @@ class Ranger(ABC):
             wis_mod=data["wis_mod"],
             cha_mod=data["cha_mod"],
             prof_bonus=data["prof_bonus"],
+            spell_mod=data["spell_mod"],
+            spell_DC=data["spell_DC"],
         )

@@ -12,6 +12,10 @@ class Create:
 
     def read(self):
         data = pd.read_excel(self.file)
+
+        data['Spell_mod'] = data['Spell_mod'].fillna(0).astype(int)
+        data['Spell_DC'] = data['Spell_DC'].fillna(0).astype(int)
+
         for _, row in data.iterrows():
             name = row['Name']
             level = int(row['Level'])
@@ -25,32 +29,36 @@ class Create:
             wis_mod = int(row['Wis'])
             cha_mod = int(row['Cha'])
             prof_bonus = int(row['Prof'])
+            spell_mod = int(row.get('Spell_mod', 0))
+            spell_DC = int(row.get('Spell_DC', 0))
 
             class_ = globals().get(class_name)
             if class_:
                 try:
                     if class_name == "Ranger":
                         character = class_(
-                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus
+                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
+                            prof_bonus, spell_mod, spell_DC
                         )
                     elif class_name == "Rogue":
                         character = class_(
-                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus
+                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
+                            prof_bonus, spell_mod, spell_DC
                         )
                     elif class_name == "Cleric":
                         character = class_(
                             level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus
+                            prof_bonus, spell_mod, spell_DC
                         )
                     elif class_name == "Fighter":
                         character = class_(
                             level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus
+                            prof_bonus, spell_mod, spell_DC
                         )
                     elif class_name == "Sorcerer":
                         character = class_(
                             level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus
+                            prof_bonus, spell_mod, spell_DC
                         )
                     else:
                         print(f"Unsupported class: {class_name}")
