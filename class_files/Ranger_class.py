@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from .Hunters_mark import HuntersMark
 
 class Ranger(ABC):
     def __init__(self, level, subclass, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus, spell_mod, spell_DC):
@@ -15,8 +16,18 @@ class Ranger(ABC):
         self.spell_mod = spell_mod
         self.spell_DC = spell_DC
 
+    @property
+    def has_multiattack(self):
+        return self.level >= 5
+
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
+
+    def perform_huntersmark(self, hit):
+        return HuntersMark.hunters_mark_dmg(hit, self.level)
+
+    def has_hunters_mark_advantage(self, level, hunters_mark):
+        return level >= 13 and hunters_mark
 
     def to_dict(self):
         return {

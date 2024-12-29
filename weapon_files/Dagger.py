@@ -10,22 +10,34 @@ class Dagger(WeaponAttack):
         self.dmg = 0
         self.supports_sneak_attack = True
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack: SneakAttack = None):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False):
+        if self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
+            advantage = True
+
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage)
 
         self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex)
+        if hunters_mark and hit:
+            self.dmg += self.owner.perform_huntersmark(hit)
 
-        self.dmg = self.apply_fighting_style(hit, roll, self.number, self.dice_type, dex)
+        if fighting_style == "TWF":
+            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage)
+            self.dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex)
+            if hunters_mark and hit2:
+                self.dmg += self.owner.perform_huntersmark(hit2)
+        else:
+            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex)
 
-        if fighting_style == None:
-            if mastery:
-                hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage)  # Second attack roll
-                second_attack_dmg = self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex)
+        if mastery:
+            hit3, roll3, advantage3 = super().attack_roll(ac, dex, advantage, disadvantage)  # Second attack roll
+            second_attack_dmg = self.calc_dmg(hit3, roll3, self.number, self.dice_type, dex)
+            if hunters_mark and hit3:
+                second_attack_dmg += self.owner.perform_huntersmark(hit3)
 
-                self.dmg += second_attack_dmg
+            self.dmg += second_attack_dmg
 
-                if second_attack_dmg != 0:
-                    self.dmg += second_attack_dmg - self.owner.dex
+            if second_attack_dmg != 0:
+                self.dmg += second_attack_dmg - (self.owner.dex if dex else self.owner.str)
 
         if isinstance(self.owner, Rogue):
             sneak_attack_applied = False  # Flag to track if sneak attack has been applied
@@ -43,37 +55,47 @@ class Dagger(WeaponAttack):
 
         return hit, roll, self.dmg
 
-    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False, include_crits=False):
+    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False, include_crits=False, hunters_mark=False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
         results = []
 
-        for _ in range(num_attacks):
-            while True:
-                # Perform the attack with the provided parameters
-                hit, roll, damage = self.perform_attack(
-                    ac=ac,
-                    dex=dex,
-                    advantage=advantage,
-                    disadvantage=disadvantage,
-                    mastery=mastery,
-                    fighting_style=self.owner.fighting_style
-                )
+        attacks_per_action = 2 if getattr(self.owner, 'has_multiattack', False) else 1
+        if self.owner.fighting_style == "TWF":
+            attacks_per_action += 1
+        if mastery:
+            attacks_per_action += 1
 
-                # If critical hits are allowed, or this roll is not a crit, exit the loop
-                if include_crits or roll != 20:
-                    break
+        for _ in range(num_attacks):
+            action_damage = 0
+            for _ in range(attacks_per_action):  # Perform multiple attacks in one action
+                while True:
+                    hit, roll, damage = self.perform_attack(
+                        ac=ac,
+                        dex=dex,
+                        advantage=advantage,
+                        disadvantage=disadvantage,
+                        mastery=mastery,
+                        fighting_style=self.owner.fighting_style,
+                        hunters_mark=hunters_mark
+                    )
+                    if include_crits or roll != 20:
+                        break
+
+                action_damage += damage
+                if hit:
+                    total_hit_damage += damage
+                    hit_count += 1
+                if not hit and mastery:
+                    action_damage += self.owner.str
 
             # Collect damage results
-            results.append(damage)
-            total_damage += damage
-            if hit:
-                total_hit_damage += damage
-                hit_count += 1
+            results.append(action_damage)
+            total_damage += action_damage
 
         # Calculate averages
-        overall_avg_damage = total_damage / num_attacks
+        overall_avg_damage = total_damage / (attacks_per_action * num_attacks)
         hit_avg_damage = total_hit_damage / hit_count if hit_count > 0 else 0
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

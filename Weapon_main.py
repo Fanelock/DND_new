@@ -44,7 +44,7 @@ class WeaponAttack(ABC):
             self.dmg += self.owner.dex if dex else self.owner.str
         return self.dmg
 
-    def apply_fighting_style(self, hit, roll, number, dice_type, dex):
+    def fighting_style(self, hit, roll, number, dice_type, dex):
         style = self.owner.fighting_style
         adjusted_dmg = 0
         if self.owner.level >= 2 and style != None:

@@ -114,6 +114,10 @@ class DND_GUI:
         self.mastery_checkbox = tk.Checkbutton(parameters_frame, text="Mastery", variable=self.mastery_var)
         self.mastery_checkbox.grid(row=2, column=1, padx=10, pady=5)
 
+        self.hunters_mark_var = tk.BooleanVar()
+        self.hunters_mark_checkbox = tk.Checkbutton(parameters_frame, text="Hunters Mark", variable=self.hunters_mark_var)
+        self.hunters_mark_checkbox.grid(row=3, column=0, padx=10, pady=5)
+
         self.dice_number_label = tk.Label(parameters_frame, text="Dice Number:")
         self.dice_number_label.grid(row=0, column=2, padx=10, pady=5)
 
@@ -210,16 +214,16 @@ class DND_GUI:
         disadvantage = self.disadvantage_var.get()
         mastery = self.mastery_var.get()
         include_crits = self.include_crits_var.get()
+        hunters_mark = self.hunters_mark_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.weapon.simulate_attacks(
-            num_attacks=1000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery, include_crits=include_crits
+            num_attacks=1000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery, include_crits=include_crits, hunters_mark=hunters_mark
         )
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 
     def simulate_spell(self, spell_name):
         spell_mapping = {"SpellAttack": SpellAttack, "SpellSave": SpellSave}
         self.spell = spell_mapping[spell_name](self.character)
-
 
         ac = int(self.ac_entry.get())
         dice_number = int(self.dice_number_entry.get())
@@ -229,6 +233,7 @@ class DND_GUI:
         advantage = self.advantage_var.get()
         disadvantage = self.disadvantage_var.get()
         include_crits = self.include_crits_var.get()
+        hunters_mark = self.hunters_mark_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.spell.simulate_attacks(
             ac=ac,
@@ -239,7 +244,8 @@ class DND_GUI:
             advantage=advantage,
             disadvantage=disadvantage,
             half_dmg=half_dmg,
-            include_crits = include_crits
+            include_crits = include_crits,
+            hunters_mark = hunters_mark
         )
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 
@@ -262,7 +268,7 @@ class DND_GUI:
             messagebox.showerror("Error", "No damage results to plot.")
             return
 
-        plt.hist(damage_results, bins=10, alpha=0.75, color='blue')
+        plt.hist(damage_results, bins=10, alpha=0.75, color='purple')
         plt.title("Damage Distribution")
         plt.xlabel("Damage")
         plt.ylabel("Frequency")
