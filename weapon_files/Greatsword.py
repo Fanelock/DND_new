@@ -50,6 +50,8 @@ class Greatsword(WeaponAttack):
             if hit:
                 total_hit_damage += damage
                 hit_count += 1
+            if not hit and mastery == True:
+                total_damage += self.owner.str
 
         # Calculate averages
         overall_avg_damage = total_damage / num_attacks
