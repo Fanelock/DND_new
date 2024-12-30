@@ -12,7 +12,7 @@ class Shortsword(WeaponAttack):
         self.attack_counter = 1
 
     def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False):
-        if self.owner == Ranger and self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
+        if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
         if mastery:

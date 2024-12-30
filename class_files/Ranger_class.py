@@ -26,7 +26,7 @@ class Ranger(ABC):
     def perform_huntersmark(self, hit):
         return HuntersMark.hunters_mark_dmg(hit, self.level)
 
-    def has_hunters_mark_advantage(self, level, hunters_mark):
+    def HuntersmarkAdv(self, level, hunters_mark):
         return level >= 13 and hunters_mark
 
     def level_up(self):
