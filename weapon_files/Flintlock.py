@@ -1,5 +1,5 @@
 from ..Weapon_main import WeaponAttack
-from ..class_files import Rogue
+from ..class_files import Rogue, Ranger
 from .. import AttackHandler
 
 class Flintlock(WeaponAttack):
@@ -11,7 +11,7 @@ class Flintlock(WeaponAttack):
         self.supports_sneak_attack = True
 
     def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False):
-        if self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
+        if self.owner == Ranger and self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
             advantage = True
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage)

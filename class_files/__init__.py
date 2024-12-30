@@ -5,5 +5,8 @@ from .Sneak_attack import SneakAttack
 from .Fighter_class import Fighter
 from .Cleric_class import Cleric
 from .Sorcerer_class import Sorcerer
+from .Gloomstalker_subclass import Gloomstalker
 
-__all__ = ["Rogue", "Ranger", "SneakAttack", "Fighter", "Cleric", "Sorcerer"]
+__all__ = ["Rogue", "Ranger", "Gloomstalker", "SneakAttack", "Fighter", "Cleric", "Sorcerer"]
+
+

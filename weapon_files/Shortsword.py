@@ -1,6 +1,5 @@
 from ..Weapon_main import WeaponAttack
-from ..class_files import SneakAttack, Ranger
-from ..class_files import Rogue
+from ..class_files import SneakAttack, Ranger, Rogue
 from .. import AttackHandler
 
 class Shortsword(WeaponAttack):

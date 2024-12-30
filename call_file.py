@@ -1,6 +1,6 @@
 from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock
 from DND_weapons.spell_files import SpellAttack, SpellSave
-from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer
+from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker
 from DND_weapons.Attack import AttackHandler
 from DND_weapons.SpellAttack import SpellAttackHandler
 import tkinter as tk
@@ -13,8 +13,40 @@ from DND_weapons.create_character import Create
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+import time
 
 """
+
+Fane = Gloomstalker(3,"GWF", 3, 2, 3, 1, 3, 2, 2, 3, 13)
+
+Fane_Greatsword = Greatsword(Fane)
+
+hit_counter = 0
+total_damage = 0
+
+# Perform 1000 attacks
+for i in range(1000):
+    hit, roll, damage = Fane_Greatsword.perform_attack(
+        ac=15,
+        dex=False,
+        advantage=False,
+        disadvantage=False,
+        mastery=True,
+        fighting_style=Fane.fighting_style,
+        hunters_mark=True
+    )
+    total_damage += damage
+    if hit:
+        hit_counter += 1
+
+# Calculate average damage
+average_damage = total_damage / 1000
+
+# Print results
+print(f"Total Hits: {hit_counter}")
+print(f"Total Damage: {total_damage}")
+print(f"Average Damage: {average_damage}")
+
 
 Sorcerer = Sorcerer("name", "type", None, 1, 1, 2, 2, 2, 4, 2, 4, 14)
 
@@ -42,6 +74,8 @@ print(f"Roll: {roll}")
 print(f"Damage: {damage}")
 
 """
+
+#start_time = time.time()
 
 class DND_GUI:
     def __init__(self, master):
@@ -254,9 +288,9 @@ class DND_GUI:
         result_window.title("Simulation Results")
 
         result_text = (
-            f"Average Damage: {round(avg_damage, 2)}\n"
-            f"Average Damage on Hit: {round(avg_hit_damage, 2)}\n"
-            f"Total Hits: {hit_count}\n"
+            f"Average Damage: {round(avg_damage)} (Includes Hit Probability)\n"
+            f"Average Damage on Hit: {round(avg_hit_damage)} (Excludes Hit Probability)\n"
+            f"Number of Hits: {hit_count}\n"
             f"Total Hit Damage: {total_hit_damage}"
         )
         tk.Label(result_window, text=result_text, padx=10, pady=10).pack()
@@ -274,12 +308,14 @@ class DND_GUI:
         plt.ylabel("Frequency")
         plt.show()
 
-
 def run_gui():
     root = tk.Tk()
     app = DND_GUI(root)
     root.mainloop()
 
+    #end_time = time.time()
+    #elapsed_time_ms = (end_time - start_time) * 1000  # Convert to milliseconds
+    #print(f"GUI Startup Time: {elapsed_time_ms:.2f} ms")
 
 if __name__ == "__main__":
     run_gui()

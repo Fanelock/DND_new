@@ -1,6 +1,6 @@
 from ..Weapon_main import WeaponAttack
 from ..class_files import SneakAttack
-from ..class_files import Rogue
+from ..class_files import Rogue, Ranger
 
 class Dagger(WeaponAttack):
     def __init__(self, owner):
@@ -10,13 +10,14 @@ class Dagger(WeaponAttack):
         self.dmg = 0
         self.supports_sneak_attack = True
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False):
-        if self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark=False):
+        if self.owner == Ranger and self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
             advantage = True
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage)
 
         self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex)
+
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit)
 
@@ -29,15 +30,16 @@ class Dagger(WeaponAttack):
             self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex)
 
         if mastery:
-            hit3, roll3, advantage3 = super().attack_roll(ac, dex, advantage, disadvantage)  # Second attack roll
-            second_attack_dmg = self.calc_dmg(hit3, roll3, self.number, self.dice_type, dex)
-            if hunters_mark and hit3:
-                second_attack_dmg += self.owner.perform_huntersmark(hit3)
+            # Check if no fighting style is present (i.e., `fighting_style == ""` or `None`)
+            if fighting_style != "TWF":  # Apply Mastery attack if no fighting style
+                hit3, roll3, advantage3 = super().attack_roll(ac, dex, advantage, disadvantage)
+                second_attack_dmg = self.calc_dmg(hit3, roll3, self.number, self.dice_type, dex)
+                if hunters_mark and hit3:
+                    second_attack_dmg += self.owner.perform_huntersmark(hit3)
 
-            self.dmg += second_attack_dmg
-
-            if second_attack_dmg != 0:
-                self.dmg += second_attack_dmg - (self.owner.dex if dex else self.owner.str)
+                # Add second attack damage without adding modifier to damage
+                if second_attack_dmg != 0:
+                    self.dmg += second_attack_dmg - (self.owner.dex if dex else self.owner.str)
 
         if isinstance(self.owner, Rogue):
             sneak_attack_applied = False  # Flag to track if sneak attack has been applied
@@ -62,10 +64,17 @@ class Dagger(WeaponAttack):
         results = []
 
         attacks_per_action = 2 if getattr(self.owner, 'has_multiattack', False) else 1
-        if self.owner.fighting_style == "TWF":
-            attacks_per_action += 1
-        if mastery:
-            attacks_per_action += 1
+
+        if self.owner.level >= 5:
+            if mastery and self.owner.fighting_style != "TWF":
+                attacks_per_action += 1  # Add a mastery attack (without modifiers for mastery) if not TWF
+            if self.owner.fighting_style == "TWF":
+                attacks_per_action += 1  # Add an additional TWF attack (with modifiers)
+
+        elif self.owner.level < 5:
+            attacks_per_action = 2  # One normal and one mastery attack
+            if self.owner.fighting_style == "TWF":
+                attacks_per_action += 1
 
         for _ in range(num_attacks):
             action_damage = 0

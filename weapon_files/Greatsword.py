@@ -1,7 +1,7 @@
 import random as rd
 from .. import AttackHandler
 from ..Weapon_main import WeaponAttack
-from ..class_files import Ranger
+from ..class_files import Ranger, Gloomstalker
 
 class Greatsword(WeaponAttack):
     def __init__(self, owner):
@@ -12,8 +12,7 @@ class Greatsword(WeaponAttack):
         self.supports_sneak_attack = False
 
     def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False):
-
-        if self.owner == Ranger and self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
+        if isinstance(self.owner, Ranger) and self.owner.has_hunters_mark_advantage(self.owner.level, hunters_mark):
             advantage = True
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage)
@@ -25,8 +24,12 @@ class Greatsword(WeaponAttack):
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit)
 
-        if self.dmg == 0 and mastery == True:
-            self.dmg = self.owner.str
+        if mastery and not hit:
+            self.dmg += self.owner.str
+
+        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+            dread = self.owner.dreadful_strikes(hit)
+            self.dmg += dread
 
         return hit, roll, self.dmg
 
@@ -53,18 +56,16 @@ class Greatsword(WeaponAttack):
                     )
                     if include_crits or roll != 20:
                         break
-
-                action_damage += damage
                 if hit:
+                    action_damage += damage
                     total_hit_damage += damage
                     hit_count += 1
                 if not hit and mastery:
-                    action_damage += self.owner.str
+                    action_damage += damage
 
             # Collect damage results
             results.append(action_damage)
             total_damage += action_damage
-
 
         # Calculate averages
         overall_avg_damage = total_damage / (attacks_per_action * num_attacks)
@@ -74,4 +75,3 @@ class Greatsword(WeaponAttack):
 
     def __str__(self):
         return f"You Greatsword deals {self.dmg} damage to the target!"
-

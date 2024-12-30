@@ -29,6 +29,26 @@ class Ranger(ABC):
     def has_hunters_mark_advantage(self, level, hunters_mark):
         return level >= 13 and hunters_mark
 
+    def level_up(self):
+        # Check if subclass present
+        if self.level >= 3 and self.subclass and self.__class__ == Ranger:
+            if self.subclass == "Gloomstalker":
+                from .Gloomstalker_subclass import Gloomstalker
+                return Gloomstalker(
+                    level=self.level,
+                    fighting_style=self.fighting_style,
+                    str_mod=self.str,
+                    dex_mod=self.dex,
+                    con_mod=self.con,
+                    int_mod=self.int,
+                    wis_mod=self.wis,
+                    cha_mod=self.cha,
+                    prof_bonus=self.prof,
+                    spell_mod=self.spell_mod,
+                    spell_DC=self.spell_DC,
+                )
+        return self
+
     def to_dict(self):
         return {
             "class_name": self.__class__.__name__,  # Identifies the class type
@@ -48,6 +68,21 @@ class Ranger(ABC):
 
     @classmethod
     def from_dict(cls, data):
+        if data["class_name"] == "Gloomstalker":
+            from .Gloomstalker_subclass import Gloomstalker
+            return Gloomstalker(
+                level=data["level"],
+                fighting_style=data["fighting_style"],
+                str_mod=data["str_mod"],
+                dex_mod=data["dex_mod"],
+                con_mod=data["con_mod"],
+                int_mod=data["int_mod"],
+                wis_mod=data["wis_mod"],
+                cha_mod=data["cha_mod"],
+                prof_bonus=data["prof_bonus"],
+                spell_mod=data["spell_mod"],
+                spell_DC=data["spell_DC"],
+            )
         return cls(
             level=data["level"],
             subclass=data.get("subclass"),

@@ -1,7 +1,8 @@
 import pandas as pd
 import json
 import os
-from DND_weapons.class_files import Ranger, Rogue, Sorcerer, Cleric, Fighter
+from DND_weapons.class_files import Ranger, Rogue, Sorcerer, Cleric, Fighter, Gloomstalker
+
 
 class Create:
     def __init__(self, file=None):
@@ -35,34 +36,15 @@ class Create:
             class_ = globals().get(class_name)
             if class_:
                 try:
-                    if class_name == "Ranger":
-                        character = class_(
-                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus, spell_mod, spell_DC
-                        )
-                    elif class_name == "Rogue":
-                        character = class_(
-                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus, spell_mod, spell_DC
-                        )
-                    elif class_name == "Cleric":
-                        character = class_(
-                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus, spell_mod, spell_DC
-                        )
-                    elif class_name == "Fighter":
-                        character = class_(
-                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus, spell_mod, spell_DC
-                        )
-                    elif class_name == "Sorcerer":
-                        character = class_(
-                            level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
-                            prof_bonus, spell_mod, spell_DC
-                        )
-                    else:
-                        print(f"Unsupported class: {class_name}")
-                        continue
+                    # Initialize the base character
+                    character = class_(
+                        level, subclass_name, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod,
+                        prof_bonus, spell_mod, spell_DC
+                    )
+
+                    # Trigger subclass conversion if applicable
+                    if isinstance(character, Ranger) and level >= 3:
+                        character = character.level_up(0)  # Check for subclass conversion without modifying level
 
                     character.name = name
                     self.characters[name] = character
@@ -85,16 +67,22 @@ class Create:
                 with open(self.save_file, "r") as f:
                     data = json.load(f)
                     for name, char_data in data.items():
-                        if char_data["class_name"] == "Rogue":
-                            self.characters[name] = Rogue.from_dict(char_data)
-                        elif char_data["class_name"] == "Ranger":
-                            self.characters[name] = Ranger.from_dict(char_data)
-                        elif char_data["class_name"] == "Fighter":
-                            self.characters[name] = Fighter.from_dict(char_data)
-                        elif char_data["class_name"] == "Cleric":
-                            self.characters[name] = Cleric.from_dict(char_data)
-                        elif char_data["class_name"] == "Sorcerer":
-                            self.characters[name] = Sorcerer.from_dict(char_data)
+                        class_name = char_data["class_name"]
+
+                        # Map class names to their respective classes
+                        class_mapping = {
+                            "Rogue": Rogue,
+                            "Ranger": Ranger,
+                            "Gloomstalker": Gloomstalker,
+                            "Fighter": Fighter,
+                            "Cleric": Cleric,
+                            "Sorcerer": Sorcerer
+                        }
+
+                        if class_name in class_mapping:
+                            self.characters[name] = class_mapping[class_name].from_dict(char_data)
+                        else:
+                            print(f"Unknown class {class_name} for character {name}. Skipping...")
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"Error loading characters: {e}. Starting with an empty character list.")
 
