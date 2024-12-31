@@ -9,7 +9,7 @@ class WeaponAttack(ABC):
         self.dmg = 0
         self.weapon_type = weapon_type
 
-    def attack_roll(self, ac, dex, advantage, disadvantage):
+    def attack_roll(self, ac, dex, advantage, disadvantage, bonus=0):
         if advantage:
             hit_roll_1 = rd.randint(1,20)
             hit_roll_2 = rd.randint(1,20)
@@ -21,19 +21,20 @@ class WeaponAttack(ABC):
         else:
             self.hit_roll = rd.randint(1, 20)
         if dex:
-            total = self.hit_roll + self.owner.dex + self.owner.prof
+            total = (self.hit_roll + self.owner.dex + self.owner.prof + bonus)
         else:
-            total = self.hit_roll + self.owner.str + self.owner.prof
+            total = (self.hit_roll + self.owner.str + self.owner.prof + bonus)
 
         return total >= ac, self.hit_roll, advantage
 
-    def calc_dmg(self, hit, roll, number, dice_type, dex):
+    def calc_dmg(self, hit, roll, number, dice_type, dex, bonus=0):
         self.dmg = 0
         if roll == 20:
             for i in range(2 * number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
             self.dmg += self.owner.dex if dex else self.owner.str
+            self.dmg += bonus
             return self.dmg
         elif not hit:
             return self.dmg
@@ -42,9 +43,10 @@ class WeaponAttack(ABC):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
             self.dmg += self.owner.dex if dex else self.owner.str
+            self.dmg += bonus
         return self.dmg
 
-    def fighting_style(self, hit, roll, number, dice_type, dex):
+    def fighting_style(self, hit, roll, number, dice_type, dex, bonus=0):
         style = self.owner.fighting_style
         adjusted_dmg = 0
         if self.owner.level >= 2 and style != None:
@@ -54,12 +56,14 @@ class WeaponAttack(ABC):
                         dmg_roll = max(rd.randint(1, dice_type), 3)
                         adjusted_dmg += dmg_roll
                     adjusted_dmg += self.owner.str
+                    adjusted_dmg += bonus
                     self.dmg = adjusted_dmg
                 else:
                     for _ in range(number):
                         dmg_roll = max(rd.randint(1, dice_type), 3)
                         adjusted_dmg += dmg_roll
                     adjusted_dmg += self.owner.str
+                    adjusted_dmg += bonus
                     self.dmg = adjusted_dmg
             if style == "Archery" and self.weapon_type == "Ranged" and hit:
                 self.dmg += 2
@@ -68,6 +72,7 @@ class WeaponAttack(ABC):
             if style == "TWF" and self.weapon_type == "Light" and hit:
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll + self.owner.dex if dex else self.owner.str
+                self.dmg += bonus
         return self.dmg
 
     @abstractmethod

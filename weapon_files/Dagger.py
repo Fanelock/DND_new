@@ -3,61 +3,72 @@ from ..class_files import SneakAttack
 from ..class_files import Rogue, Ranger
 
 class Dagger(WeaponAttack):
-    def __init__(self, owner):
+    def __init__(self, owner, bonus = 0):
         super().__init__(owner, "Dagger", "Light")
         self.number = 1
         self.dice_type = 4
         self.dmg = 0
         self.supports_sneak_attack = True
+        self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark=False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
-        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage)
+        if self.owner == Rogue and advantage == True:
+            sneak_attack = True
 
-        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex)
+        hit2 = False
+        hit3 = False
 
+        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus = self.bonus)
+
+        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit)
-
         if fighting_style == "TWF":
-            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage)
-            self.dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex)
+            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus = self.bonus)
+            self.dmg += self.fighting_style(hit2, roll2, self.number, self.dice_type, dex, bonus = self.bonus)
             if hunters_mark and hit2:
                 self.dmg += self.owner.perform_huntersmark(hit2)
         else:
-            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex)
+            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
 
+        second_attack_dmg = 0
+        true_dmg = 0
         if mastery:
-            # Check if no fighting style is present (i.e., `fighting_style == ""` or `None`)
+            # Initialize second_attack_dmg as 0
             if fighting_style != "TWF":  # Apply Mastery attack if no fighting style
-                hit3, roll3, advantage3 = super().attack_roll(ac, dex, advantage, disadvantage)
-                second_attack_dmg = self.calc_dmg(hit3, roll3, self.number, self.dice_type, dex)
+                hit3, roll3, advantage3 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
+                second_attack_dmg += self.calc_dmg(hit3, roll3, self.number, self.dice_type, dex, bonus=self.bonus)
                 if hunters_mark and hit3:
                     second_attack_dmg += self.owner.perform_huntersmark(hit3)
 
-                # Add second attack damage without adding modifier to damage
-                if second_attack_dmg != 0:
-                    self.dmg += second_attack_dmg - (self.owner.dex if dex else self.owner.str)
+            if second_attack_dmg != 0:
+                true_dmg += second_attack_dmg - (self.owner.dex if dex else self.owner.str)
+                self.dmg += true_dmg
 
-        if isinstance(self.owner, Rogue):
+        if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
             sneak_attack_applied = False  # Flag to track if sneak attack has been applied
 
-            # Apply sneak attack only once, regardless of whether the first or second attack hits
-            if (advantage and hit and not sneak_attack_applied):
-                sneak_dmg = sneak_attack.sneak_damage()
-                self.dmg += sneak_dmg
-                sneak_attack_applied = True  # Set the flag to True so that we don't apply it again
-
-            if (advantage and hit2 and not sneak_attack_applied):  # Only apply sneak attack if it's not already applied
-                sneak_dmg = sneak_attack.sneak_damage()
+            #Apply sneak attack only once
+            if advantage and hit and not sneak_attack_applied:
+                sneak_dmg = self.owner.perform_sneak_attack(hit, advantage, roll)
                 self.dmg += sneak_dmg
                 sneak_attack_applied = True
-
+            if advantage and hit2 and not sneak_attack_applied:
+                sneak_dmg = self.owner.perform_sneak_attack(hit2, advantage, roll)
+                self.dmg += sneak_dmg
+                sneak_attack_applied = True
+            if advantage and hit3 and not sneak_attack_applied:
+                sneak_dmg = self.owner.perform_sneak_attack(hit3, advantage, roll)
+                self.dmg += sneak_dmg
+                sneak_attack_applied = True
+        print("post sneak", self.dmg)
         return hit, roll, self.dmg
 
-    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False, include_crits=False, hunters_mark=False):
+    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False,
+                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -87,7 +98,9 @@ class Dagger(WeaponAttack):
                         disadvantage=disadvantage,
                         mastery=mastery,
                         fighting_style=self.owner.fighting_style,
-                        hunters_mark=hunters_mark
+                        sneak_attack = sneak_attack,
+                        hunters_mark=hunters_mark,
+                        bonus=bonus
                     )
                     if include_crits or roll != 20:
                         break
@@ -96,8 +109,7 @@ class Dagger(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
-                if not hit and mastery:
-                    action_damage += self.owner.str
+
 
             # Collect damage results
             results.append(action_damage)

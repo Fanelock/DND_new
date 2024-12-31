@@ -3,44 +3,49 @@ from ..class_files import SneakAttack, Ranger, Rogue
 from .. import AttackHandler
 
 class Shortsword(WeaponAttack):
-    def __init__(self, owner):
+    def __init__(self, owner, bonus = 0):
         super().__init__(owner, "Shortsword", "Light")
         self.number = 1
         self.dice_type = 6
         self.dmg = 0
         self.supports_sneak_attack = True
         self.attack_counter = 1
+        self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
+
+        if self.owner == Rogue and advantage == True:
+            sneak_attack = True
 
         if mastery:
             advantage = self.attack_counter % 2 == 0
 
-        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage)
+        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex)
+        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
         if hunters_mark and hit:
-            self.dmg += self.owner.perform_huntersmark(hit)
+            self.dmg += self.owner.perform_huntersmark(hit, roll)
 
         if fighting_style == "TWF":
-            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage)
+            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
             self.dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex)
             if hunters_mark and hit2:
-                self.dmg += self.owner.perform_huntersmark(hit2)
+                self.dmg += self.owner.perform_huntersmark(hit2, roll2)
         else:
-            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex)
+            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
-        if isinstance(self.owner, Rogue):
-            sneak_dmg = self.owner.perform_sneak_attack(hit, advantage, roll)
+        if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
+            sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
             self.dmg += sneak_dmg
 
         self.attack_counter += 1
 
         return hit, roll, self.dmg
 
-    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False, include_crits=False, hunters_mark=False):
+    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False,
+                            include_crits=False, sneak_attack=False, hunters_mark=False, bonus=0):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -62,7 +67,9 @@ class Shortsword(WeaponAttack):
                         disadvantage=disadvantage,
                         mastery=mastery,
                         fighting_style=self.owner.fighting_style,
-                        hunters_mark=hunters_mark
+                        sneak_attack=sneak_attack,
+                        hunters_mark=hunters_mark,
+                        bonus = bonus
                     )
                     if include_crits or roll != 20:
                         break
@@ -71,8 +78,7 @@ class Shortsword(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
-                if not hit and mastery:
-                    action_damage += self.owner.str
+
 
             # Collect damage results
             results.append(action_damage)

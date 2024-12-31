@@ -20,10 +20,8 @@ class Rogue(ABC):
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
 
-    def perform_sneak_attack(self, hit, advantage, roll):
-        if hit and advantage:
-            return self.sneak_attack.sneak_damage(hit, roll)
-        return 0
+    def perform_sneak_attack(self, hit, roll):
+        return SneakAttack.sneak_damage(hit, self.level, roll)
 
     def to_dict(self):
         """Serialize Rogue instance to JSON."""

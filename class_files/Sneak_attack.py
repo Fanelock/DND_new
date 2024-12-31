@@ -10,8 +10,9 @@ class SneakAttack(WeaponAttack):
     def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style):
         pass
 
-    def sneak_damage(self, hit, roll):
-        dice_number = math.ceil(self.owner.level / 2)
+    @staticmethod
+    def sneak_damage(hit, level, roll):
+        dice_number = math.ceil(level / 2)
         dmg = 0  # Reset the damage for each sneak attack calculation
         if hit:  # Only calculate sneak attack if the attack hits
             if roll == 20:  # Critical hit doubles the dice

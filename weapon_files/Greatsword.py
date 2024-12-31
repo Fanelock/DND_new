@@ -3,23 +3,26 @@ from .. import AttackHandler
 from ..Weapon_main import WeaponAttack
 from ..class_files import Ranger, Gloomstalker
 
+
 class Greatsword(WeaponAttack):
-    def __init__(self, owner):
+    def __init__(self, owner, bonus=0):
         super().__init__(owner, "Greatsword", "Two-Handed")
         self.number = 2
         self.dice_type = 6
         self.dmg = 0
         self.supports_sneak_attack = False
+        self.hit_count = 0
+        self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=None, hunters_mark = False, bonus=0):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
-        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage)
+        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex)
+        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
-        self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex)
+        self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit)
@@ -33,7 +36,8 @@ class Greatsword(WeaponAttack):
 
         return hit, roll, self.dmg
 
-    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False, include_crits=False, hunters_mark=False):
+    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False,
+                        include_crits=False, hunters_mark=False, bonus = 0):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -52,7 +56,8 @@ class Greatsword(WeaponAttack):
                         disadvantage=disadvantage,
                         mastery=mastery,
                         fighting_style=self.owner.fighting_style,
-                        hunters_mark=hunters_mark
+                        hunters_mark=hunters_mark,
+                        bonus=bonus
                     )
                     if include_crits or roll != 20:
                         break

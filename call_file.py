@@ -1,4 +1,4 @@
-from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock
+from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock, CrossbowLight, CrossbowHeavy
 from DND_weapons.spell_files import SpellAttack, SpellSave
 from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker
 from DND_weapons.Attack import AttackHandler
@@ -106,13 +106,24 @@ class DND_GUI:
         selection_frame = tk.Frame(master)
         selection_frame.pack(pady=10)
 
+        selection_frame.grid_rowconfigure(0, weight=1)
+        selection_frame.grid_rowconfigure(1, weight=1)
+        selection_frame.grid_rowconfigure(2, weight=1)
+        selection_frame.grid_rowconfigure(3, weight=1)
+        selection_frame.grid_rowconfigure(4, weight=1)
+        selection_frame.grid_columnconfigure(0, weight=1)
+        selection_frame.grid_columnconfigure(1, weight=1)
+        selection_frame.grid_columnconfigure(2, weight=1)
+        selection_frame.grid_columnconfigure(3, weight=1)
+        selection_frame.grid_columnconfigure(4, weight=1)
+
         self.weapon_label = tk.Label(selection_frame, text="Select Weapon:")
         self.weapon_label.grid(row=0, column=0, padx=10, pady=5)
 
         self.weapon_var = tk.StringVar(value="None")
         self.weapon_dropdown = tk.OptionMenu(
-            selection_frame, self.weapon_var, "None", "Greatsword", "Shortsword", "Dagger", "Longbow", "Longsword", "Glaive", "Flintlock"
-        )
+            selection_frame, self.weapon_var, "None", "Greatsword", "Shortsword", "Dagger", "Longbow", "Longsword", "Glaive", "Flintlock",
+        "Light Crossbow", "Heavy Crossbow")
         self.weapon_dropdown.grid(row=1, column=0, padx=10, pady=5)
 
         self.spell_label = tk.Label(selection_frame, text="Select Spell:")
@@ -127,56 +138,76 @@ class DND_GUI:
         parameters_frame.pack(pady=10)
 
         self.ac_label = tk.Label(parameters_frame, text="Target AC:")
-        self.ac_label.grid(row=0, column=0, padx=10, pady=5)
+        self.ac_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
         self.ac_entry = tk.Entry(parameters_frame)
-        self.ac_entry.grid(row=0, column=1, padx=10, pady=5)
+        self.ac_entry.grid(row=0, column=1, padx=10, pady=5, sticky="w")
 
         self.dex_var = tk.BooleanVar()
         self.dex_checkbox = tk.Checkbutton(parameters_frame, text="Use Dexterity", variable=self.dex_var)
-        self.dex_checkbox.grid(row=1, column=0, padx=10, pady=5)
+        self.dex_checkbox.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 
         self.advantage_var = tk.BooleanVar()
         self.advantage_checkbox = tk.Checkbutton(parameters_frame, text="Advantage", variable=self.advantage_var)
-        self.advantage_checkbox.grid(row=1, column=1, padx=10, pady=5)
+        self.advantage_checkbox.grid(row=1, column=1, padx=10, pady=5, sticky="w")
 
         self.disadvantage_var = tk.BooleanVar()
         self.disadvantage_checkbox = tk.Checkbutton(parameters_frame, text="Disadvantage", variable=self.disadvantage_var)
-        self.disadvantage_checkbox.grid(row=2, column=0, padx=10, pady=5)
+        self.disadvantage_checkbox.grid(row=2, column=1, padx=10, pady=5, sticky="w")
 
         self.mastery_var = tk.BooleanVar()  # Variable to hold the state of the checkbox
         self.mastery_checkbox = tk.Checkbutton(parameters_frame, text="Mastery", variable=self.mastery_var)
-        self.mastery_checkbox.grid(row=2, column=1, padx=10, pady=5)
+        self.mastery_checkbox.grid(row=2, column=0, padx=10, pady=5, sticky="w")
 
         self.hunters_mark_var = tk.BooleanVar()
         self.hunters_mark_checkbox = tk.Checkbutton(parameters_frame, text="Hunters Mark", variable=self.hunters_mark_var)
-        self.hunters_mark_checkbox.grid(row=3, column=0, padx=10, pady=5)
+        self.hunters_mark_checkbox.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+
+        self.sneak_attack_var = tk.BooleanVar()
+        self.sneak_attack_checkbox = tk.Checkbutton(parameters_frame, text="Sneak Attack", variable=self.sneak_attack_var)
+        self.sneak_attack_checkbox.grid(row=3, column=1, padx=10, pady=5, sticky="w")
+
+        self.pact_weapon_var = tk.BooleanVar()
+        self.pact_weapon_checkbox = tk.Checkbutton(parameters_frame, text="Pact Weapon", variable=self.pact_weapon_var)
+        self.pact_weapon_checkbox.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+
+        self.plus_one_var = tk.BooleanVar()
+        self.plus_one_checkbox = tk.Checkbutton(parameters_frame, text="+1 Item", variable=self.plus_one_var)
+        self.plus_one_checkbox.grid(row=4, column=1, padx=10, pady=5, sticky="w")
 
         self.dice_number_label = tk.Label(parameters_frame, text="Dice Number:")
-        self.dice_number_label.grid(row=0, column=2, padx=10, pady=5)
+        self.dice_number_label.grid(row=0, column=2, padx=10, pady=5, sticky="w")
 
         self.dice_number_entry = tk.Entry(parameters_frame)
-        self.dice_number_entry.grid(row=0, column=3, padx=10, pady=5)
+        self.dice_number_entry.grid(row=0, column=3, padx=10, pady=5, sticky="w")
 
         self.dice_type_label = tk.Label(parameters_frame, text="Dice Type:")
-        self.dice_type_label.grid(row=1, column=2, padx=10, pady=5)
+        self.dice_type_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")
 
         self.dice_type_entry = tk.Entry(parameters_frame)
-        self.dice_type_entry.grid(row=1, column=3, padx=10, pady=5)
+        self.dice_type_entry.grid(row=1, column=3, padx=10, pady=5, sticky="w")
 
         self.save_label = tk.Label(parameters_frame, text="Target Save Bonus:")
-        self.save_label.grid(row=2, column=2, padx=10, pady=5)
+        self.save_label.grid(row=2, column=2, padx=10, pady=5, sticky="w")
 
         self.save_entry = tk.Entry(parameters_frame)
-        self.save_entry.grid(row=2, column=3, padx=10, pady=5)
+        self.save_entry.grid(row=2, column=3, padx=10, pady=5, sticky="w")
 
         self.half_dmg_var = tk.BooleanVar()
         self.half_dmg_checkbox = tk.Checkbutton(parameters_frame, text="Half Damage", variable=self.half_dmg_var)
-        self.half_dmg_checkbox.grid(row=3, column=2, padx=10, pady=5)
+        self.half_dmg_checkbox.grid(row=3, column=2, padx=10, pady=5, sticky="w")
 
         self.include_crits_var = tk.BooleanVar()
         self.include_crits_checkbox = tk.Checkbutton(parameters_frame, text="Include Critical Hits", variable=self.include_crits_var)
-        self.include_crits_checkbox.grid(row=3, column=3, padx=10, pady=5)
+        self.include_crits_checkbox.grid(row=3, column=3, padx=10, pady=5, sticky="w")
+
+        self.plus_two_var = tk.BooleanVar()
+        self.plus_two_checkbox = tk.Checkbutton(parameters_frame, text="+2 Item", variable=self.plus_two_var)
+        self.plus_two_checkbox.grid(row=4, column=2, padx=10, pady=5, sticky="w")
+
+        self.plus_three_var = tk.BooleanVar()
+        self.plus_three_checkbox = tk.Checkbutton(parameters_frame, text="+3 Item", variable=self.plus_three_var)
+        self.plus_three_checkbox.grid(row=4, column=3, padx=10, pady=5, sticky="w")
 
         # Run Simulation Button
         self.run_button = tk.Button(master, text="Run Simulation", state=tk.DISABLED, command=self.run_simulation)
@@ -230,17 +261,36 @@ class DND_GUI:
         except Exception as e:
             messagebox.showerror("Error", f"An unexpected error occurred: {str(e)}")
 
+    def get_selected_bonus(self):
+        if self.plus_one_var.get():
+            return 1
+        elif self.plus_two_var.get():
+            return 2
+        elif self.plus_three_var.get():
+            return 3
+        return 0
+
     def simulate_weapon(self, weapon_name):
+        bonus = self.get_selected_bonus()
+
+        # Define the weapon mapping with the correct usage of bonus
         weapon_mapping = {
-            "Greatsword": Greatsword,
-            "Shortsword": Shortsword,
-            "Dagger": Dagger,
-            "Longbow": Longbow,
-            "Longsword": Longsword,
-            "Glaive": Glaive,
-            "Flintlock": Flintlock,
+            "Greatsword": lambda owner: Greatsword(owner, bonus),
+            "Shortsword": lambda owner: Shortsword(owner, bonus),
+            "Dagger": lambda owner: Dagger(owner, bonus),
+            "Longbow": lambda owner: Longbow(owner, bonus),
+            "Longsword": lambda owner: Longsword(owner, bonus),
+            "Glaive": lambda owner: Glaive(owner, bonus),
+            "Flintlock": lambda owner: Flintlock(owner, bonus),
+            "Light Crossbow": lambda owner: CrossbowLight(owner, bonus),
+            "Heavy Crossbow": lambda owner: CrossbowHeavy(owner, bonus)
         }
-        self.weapon = weapon_mapping[weapon_name](self.character)
+
+        # Initialize the selected weapon
+        if weapon_name in weapon_mapping:
+            self.weapon = weapon_mapping[weapon_name](self.character)
+        else:
+            raise ValueError(f"Weapon '{weapon_name}' not recognized.")
 
         ac = int(self.ac_entry.get())
         dex = self.dex_var.get()
@@ -248,10 +298,12 @@ class DND_GUI:
         disadvantage = self.disadvantage_var.get()
         mastery = self.mastery_var.get()
         include_crits = self.include_crits_var.get()
+        sneak_attack = self.sneak_attack_var.get()
         hunters_mark = self.hunters_mark_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.weapon.simulate_attacks(
-            num_attacks=1000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery, include_crits=include_crits, hunters_mark=hunters_mark
+            num_attacks=1000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery,
+            include_crits=include_crits, sneak_attack = sneak_attack, hunters_mark=hunters_mark, bonus=bonus
         )
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 
