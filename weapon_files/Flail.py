@@ -1,36 +1,29 @@
 import random as rd
 from .. import AttackHandler
 from ..Weapon_main import WeaponAttack
-from ..class_files import Ranger, Gloomstalker, Rogue, Cleric
+from ..class_files import Ranger, Gloomstalker, Cleric
 
-class CrossbowLight(WeaponAttack):
+class Flail(WeaponAttack):
     def __init__(self, owner, bonus = 0):
-        super().__init__(owner, "Light Crossbow", "Ranged")
+        super().__init__(owner, "Flail", "Meele")
         self.number = 1
         self.dice_type = 8
         self.dmg = 0
-        self.supports_sneak_attack = True
+        self.supports_sneak_attack = False
         self.bonus = bonus
 
     def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
-        if self.owner == Rogue and advantage == True:
-            sneak_attack = True
-
-        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
+        hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus = self.bonus)
 
         self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
 
-        self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
+        self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
 
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit, roll)
-
-        if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
-            sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
-            self.dmg += sneak_dmg
 
         if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
             dread = self.owner.dreadful_strikes(hit, roll)
@@ -62,9 +55,8 @@ class CrossbowLight(WeaponAttack):
                         disadvantage=disadvantage,
                         mastery=mastery,
                         fighting_style=self.owner.fighting_style,
-                        sneak_attack = sneak_attack,
                         hunters_mark=hunters_mark,
-                        bonus=bonus
+                        bonus = bonus
                     )
                     if include_crits or roll != 20:
                         break
@@ -73,6 +65,8 @@ class CrossbowLight(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
+                if not hit and mastery:
+                    action_damage += self.owner.str
 
             # Collect damage results
             results.append(action_damage)
@@ -85,4 +79,4 @@ class CrossbowLight(WeaponAttack):
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 
     def __str__(self):
-        return f"You Light Crossbow deals {self.dmg} damage to the target!"
+        return f"You Longsword deals {self.dmg} damage to the target!"

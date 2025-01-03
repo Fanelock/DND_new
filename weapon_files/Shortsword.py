@@ -1,5 +1,5 @@
 from ..Weapon_main import WeaponAttack
-from ..class_files import SneakAttack, Ranger, Rogue
+from ..class_files import SneakAttack, Ranger, Rogue, Cleric, Gloomstalker
 from .. import AttackHandler
 
 class Shortsword(WeaponAttack):
@@ -39,6 +39,14 @@ class Shortsword(WeaponAttack):
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
             sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
             self.dmg += sneak_dmg
+
+        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+            dread = self.owner.dreadful_strikes(hit, roll)
+            self.dmg += dread
+
+        if isinstance(self.owner, Cleric) and self.owner.level >= 7:
+            divine = self.owner.divine_strike(hit, roll)
+            self.dmg += divine
 
         self.attack_counter += 1
 

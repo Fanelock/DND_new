@@ -1,6 +1,7 @@
-from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock, CrossbowLight, CrossbowHeavy
+from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock, CrossbowLight, \
+                                        CrossbowHeavy, Flail, Warhammer, Javelin
 from DND_weapons.spell_files import SpellAttack, SpellSave
-from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker
+from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker, Paladin, Vengeance, Warlock
 from DND_weapons.Attack import AttackHandler
 from DND_weapons.SpellAttack import SpellAttackHandler
 import tkinter as tk
@@ -117,21 +118,37 @@ class DND_GUI:
         selection_frame.grid_columnconfigure(3, weight=1)
         selection_frame.grid_columnconfigure(4, weight=1)
 
-        self.weapon_label = tk.Label(selection_frame, text="Select Weapon:")
-        self.weapon_label.grid(row=0, column=0, padx=10, pady=5)
+        self.weapon_simple_label = tk.Label(selection_frame, text="Simple Melee Weapons:")
+        self.weapon_simple_label.grid(row=0, column=0, padx=10, pady=5)
+
+        self.weapon_simple_var = tk.StringVar(value="None")
+        self.weapon_simple_dropdown = tk.OptionMenu(
+            selection_frame, self.weapon_simple_var, "None", "Dagger", "Javelin")
+        self.weapon_simple_dropdown.grid(row=1, column=0, padx=10, pady=5)
+
+        self.weapon_label = tk.Label(selection_frame, text="Martial Melee Weapons:")
+        self.weapon_label.grid(row=0, column=1, padx=10, pady=5)
 
         self.weapon_var = tk.StringVar(value="None")
         self.weapon_dropdown = tk.OptionMenu(
-            selection_frame, self.weapon_var, "None", "Greatsword", "Shortsword", "Dagger", "Longbow", "Longsword", "Glaive", "Flintlock",
-        "Light Crossbow", "Heavy Crossbow")
-        self.weapon_dropdown.grid(row=1, column=0, padx=10, pady=5)
+            selection_frame, self.weapon_var, "None", "Greatsword", "Shortsword", "Longsword", "Glaive", "Flail", "Warhammer")
+        self.weapon_dropdown.grid(row=1, column=1, padx=10, pady=5)
+
+        self.weapon_ranged_label = tk.Label(selection_frame, text="Ranged Weapons:")
+        self.weapon_ranged_label.grid(row=0, column=2, padx=10, pady=5)
+
+        self.weapon_ranged_var = tk.StringVar(value="None")
+        self.weapon_ranged_dropdown = tk.OptionMenu(
+            selection_frame, self.weapon_ranged_var, "None", "Longbow", "Flintlock",
+            "Light Crossbow", "Heavy Crossbow")
+        self.weapon_ranged_dropdown.grid(row=1, column=2, padx=10, pady=5)
 
         self.spell_label = tk.Label(selection_frame, text="Select Spell:")
-        self.spell_label.grid(row=0, column=1, padx=10, pady=5)
+        self.spell_label.grid(row=0, column=3, padx=10, pady=5)
 
         self.spell_var = tk.StringVar(value="None")
         self.spell_dropdown = tk.OptionMenu(selection_frame, self.spell_var, "None", "SpellAttack", "SpellSave")
-        self.spell_dropdown.grid(row=1, column=1, padx=10, pady=5)
+        self.spell_dropdown.grid(row=1, column=3, padx=10, pady=5)
 
         # Parameters frame
         parameters_frame = tk.Frame(master)
@@ -167,9 +184,9 @@ class DND_GUI:
         self.sneak_attack_checkbox = tk.Checkbutton(parameters_frame, text="Sneak Attack", variable=self.sneak_attack_var)
         self.sneak_attack_checkbox.grid(row=3, column=1, padx=10, pady=5, sticky="w")
 
-        self.pact_weapon_var = tk.BooleanVar()
-        self.pact_weapon_checkbox = tk.Checkbutton(parameters_frame, text="Pact Weapon", variable=self.pact_weapon_var)
-        self.pact_weapon_checkbox.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+        self.smite_var = tk.BooleanVar()
+        self.smite_checkbox = tk.Checkbutton(parameters_frame, text="Smite", variable=self.smite_var)
+        self.smite_checkbox.grid(row=4, column=0, padx=10, pady=5, sticky="w")
 
         self.plus_one_var = tk.BooleanVar()
         self.plus_one_checkbox = tk.Checkbutton(parameters_frame, text="+1 Item", variable=self.plus_one_var)
@@ -208,6 +225,10 @@ class DND_GUI:
         self.plus_three_var = tk.BooleanVar()
         self.plus_three_checkbox = tk.Checkbutton(parameters_frame, text="+3 Item", variable=self.plus_three_var)
         self.plus_three_checkbox.grid(row=4, column=3, padx=10, pady=5, sticky="w")
+
+        self.pact_weapon_var = tk.BooleanVar()
+        self.pact_weapon_checkbox = tk.Checkbutton(parameters_frame, text="Pact Weapon", variable=self.pact_weapon_var)
+        self.pact_weapon_checkbox.grid(row=5, column=0, padx=10, pady=5, sticky="w")
 
         # Run Simulation Button
         self.run_button = tk.Button(master, text="Run Simulation", state=tk.DISABLED, command=self.run_simulation)
@@ -249,7 +270,10 @@ class DND_GUI:
             selected_character = self.character_listbox.get(self.character_listbox.curselection())
             self.character = self.create.get_character(selected_character)
 
-            weapon_name = self.weapon_var.get()
+            weapon_name = next(
+                (name for name in [self.weapon_simple_var.get(), self.weapon_var.get(), self.weapon_ranged_var.get()] if
+                name != "None"), None
+            )
             spell_name = self.spell_var.get()
 
             if weapon_name != "None":
@@ -261,7 +285,7 @@ class DND_GUI:
         except Exception as e:
             messagebox.showerror("Error", f"An unexpected error occurred: {str(e)}")
 
-    def get_selected_bonus(self):
+    def get_bonus(self):
         if self.plus_one_var.get():
             return 1
         elif self.plus_two_var.get():
@@ -271,9 +295,11 @@ class DND_GUI:
         return 0
 
     def simulate_weapon(self, weapon_name):
-        bonus = self.get_selected_bonus()
+        bonus = self.get_bonus()
 
-        # Define the weapon mapping with the correct usage of bonus
+        if self.pact_weapon_var.get():
+            self.character.str = self.character.cha
+
         weapon_mapping = {
             "Greatsword": lambda owner: Greatsword(owner, bonus),
             "Shortsword": lambda owner: Shortsword(owner, bonus),
@@ -283,7 +309,10 @@ class DND_GUI:
             "Glaive": lambda owner: Glaive(owner, bonus),
             "Flintlock": lambda owner: Flintlock(owner, bonus),
             "Light Crossbow": lambda owner: CrossbowLight(owner, bonus),
-            "Heavy Crossbow": lambda owner: CrossbowHeavy(owner, bonus)
+            "Heavy Crossbow": lambda owner: CrossbowHeavy(owner, bonus),
+            "Flail": lambda owner: Flail(owner, bonus),
+            "Warhammer": lambda owner: Warhammer(owner, bonus),
+            "Javelin": lambda owner: Javelin(owner, bonus)
         }
 
         # Initialize the selected weapon
@@ -308,7 +337,10 @@ class DND_GUI:
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 
     def simulate_spell(self, spell_name):
-        spell_mapping = {"SpellAttack": SpellAttack, "SpellSave": SpellSave}
+        bonus = self.get_bonus()
+        spell_mapping = {
+            "SpellAttack": lambda owner: SpellAttack(owner, bonus),
+            "SpellSave": lambda owner: SpellSave(owner, bonus)}
         self.spell = spell_mapping[spell_name](self.character)
 
         ac = int(self.ac_entry.get())
@@ -319,6 +351,7 @@ class DND_GUI:
         advantage = self.advantage_var.get()
         disadvantage = self.disadvantage_var.get()
         include_crits = self.include_crits_var.get()
+        sneak_attack = self.sneak_attack_var.get()
         hunters_mark = self.hunters_mark_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.spell.simulate_attacks(
@@ -331,7 +364,9 @@ class DND_GUI:
             disadvantage=disadvantage,
             half_dmg=half_dmg,
             include_crits = include_crits,
-            hunters_mark = hunters_mark
+            sneak_attack = sneak_attack,
+            hunters_mark = hunters_mark,
+            bonus = bonus
         )
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 
@@ -340,8 +375,8 @@ class DND_GUI:
         result_window.title("Simulation Results")
 
         result_text = (
-            f"Average Damage: {round(avg_damage)} (Includes Hit Probability)\n"
-            f"Average Damage on Hit: {round(avg_hit_damage)} (Excludes Hit Probability)\n"
+            f"Average Damage: {round(avg_damage, 1)} (Includes Hit Probability)\n"
+            f"Average Damage on Hit: {round(avg_hit_damage, 1)} (Excludes Hit Probability)\n"
             f"Number of Hits: {hit_count}\n"
             f"Total Hit Damage: {total_hit_damage}"
         )

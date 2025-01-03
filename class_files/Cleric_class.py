@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import random as rd
 
 class Cleric(ABC):
     def __init__(self, level, subclass, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus, spell_mod, spell_DC):
@@ -17,6 +18,14 @@ class Cleric(ABC):
 
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
+
+    def divine_strike(self, hit, roll):
+        dice_number = 2 if self.level >= 14 else 1
+        if not hit:
+            return 0
+        elif roll == 20:
+            return sum([rd.randint(1, 8) for _ in range(dice_number * 2)])
+        return sum([rd.randint(1, 8) for _ in range(dice_number)])
 
     def to_dict(self):
         return {

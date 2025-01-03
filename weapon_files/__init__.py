@@ -7,5 +7,9 @@ from .Longsword import Longsword
 from .Flintlock import Flintlock
 from .CrossbowLight import CrossbowLight
 from .CrossbowHeavy import CrossbowHeavy
+from .Flail import Flail
+from .Warhammer import Warhammer
+from .Javelin import Javelin
 
-__all__ = ["Dagger", "Shortsword", "Longbow", "Greatsword", "Glaive", "Longsword", "Flintlock", "CrossbowLight", "CrossbowHeavy"]
+__all__ = ["Dagger", "Shortsword", "Longbow", "Greatsword", "Glaive", "Longsword", "Flintlock", "CrossbowLight",
+            "CrossbowHeavy", "Javelin", "Warhammer", "Flail"]

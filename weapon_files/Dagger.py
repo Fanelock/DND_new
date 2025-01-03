@@ -1,6 +1,6 @@
 from ..Weapon_main import WeaponAttack
 from ..class_files import SneakAttack
-from ..class_files import Rogue, Ranger
+from ..class_files import Rogue, Ranger, Gloomstalker, Cleric
 
 class Dagger(WeaponAttack):
     def __init__(self, owner, bonus = 0):
@@ -18,54 +18,39 @@ class Dagger(WeaponAttack):
         if self.owner == Rogue and advantage == True:
             sneak_attack = True
 
-        hit2 = False
-        hit3 = False
-
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus = self.bonus)
 
-        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
-        if hunters_mark and hit:
-            self.dmg += self.owner.perform_huntersmark(hit)
-        if fighting_style == "TWF":
-            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus = self.bonus)
-            self.dmg += self.fighting_style(hit2, roll2, self.number, self.dice_type, dex, bonus = self.bonus)
-            if hunters_mark and hit2:
-                self.dmg += self.owner.perform_huntersmark(hit2)
+        base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
+
+        if hasattr(self, 'fighting_style') and callable(self.fighting_style) and fighting_style != "TWF":
+            damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
         else:
-            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
+            damage = base_dmg
 
-        second_attack_dmg = 0
-        true_dmg = 0
-        if mastery:
-            # Initialize second_attack_dmg as 0
-            if fighting_style != "TWF":  # Apply Mastery attack if no fighting style
-                hit3, roll3, advantage3 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
-                second_attack_dmg += self.calc_dmg(hit3, roll3, self.number, self.dice_type, dex, bonus=self.bonus)
-                if hunters_mark and hit3:
-                    second_attack_dmg += self.owner.perform_huntersmark(hit3)
+        print("post fighting style:", self.dmg)
 
-            if second_attack_dmg != 0:
-                true_dmg += second_attack_dmg - (self.owner.dex if dex else self.owner.str)
-                self.dmg += true_dmg
+        if hunters_mark and hit:
+            damage += self.owner.perform_huntersmark(hit, roll)
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
             sneak_attack_applied = False  # Flag to track if sneak attack has been applied
-
             #Apply sneak attack only once
             if advantage and hit and not sneak_attack_applied:
                 sneak_dmg = self.owner.perform_sneak_attack(hit, advantage, roll)
                 self.dmg += sneak_dmg
                 sneak_attack_applied = True
-            if advantage and hit2 and not sneak_attack_applied:
-                sneak_dmg = self.owner.perform_sneak_attack(hit2, advantage, roll)
-                self.dmg += sneak_dmg
-                sneak_attack_applied = True
-            if advantage and hit3 and not sneak_attack_applied:
-                sneak_dmg = self.owner.perform_sneak_attack(hit3, advantage, roll)
-                self.dmg += sneak_dmg
-                sneak_attack_applied = True
-        print("post sneak", self.dmg)
-        return hit, roll, self.dmg
+
+        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+            dread = self.owner.dreadful_strikes(hit, roll)
+            self.dmg += dread
+
+        if isinstance(self.owner, Cleric) and self.owner.level >= 7:
+            divine = self.owner.divine_strike(hit, roll)
+            self.dmg += divine
+
+        print("end dmg:", self.dmg)
+
+        return hit, roll, base_dmg
 
     def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False,
                             include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0):
@@ -109,7 +94,6 @@ class Dagger(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
-
 
             # Collect damage results
             results.append(action_damage)

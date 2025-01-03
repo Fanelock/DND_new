@@ -9,7 +9,7 @@ class Spell(ABC):
         self.type = type
         self.dmg = 0
 
-    def spell_attack(self, ac, advantage, disadvantage):
+    def spell_attack(self, ac, advantage, disadvantage, bonus = 0):
         if advantage:
             hit_roll_1 = rd.randint(1,20)
             hit_roll_2 = rd.randint(1,20)
@@ -20,11 +20,11 @@ class Spell(ABC):
             self.hit_roll = min(hit_roll_1, hit_roll_2)
         else:
             self.hit_roll = rd.randint(1, 20)
-        total = self.hit_roll + self.owner.spell_mod + self.owner.prof
+        total = (self.hit_roll + self.owner.spell_mod + self.owner.prof + bonus)
 
         return total >= ac, self.hit_roll, advantage
 
-    def spell_save(self, save_bonus, advantage, disadvantage):
+    def spell_save(self, save_bonus, advantage, disadvantage, bonus = 0):
         if advantage:
             save_roll_1 = rd.randint(1,20)
             save_roll_2 = rd.randint(1,20)
@@ -37,15 +37,15 @@ class Spell(ABC):
             self.save_roll = rd.randint(1, 20)
         total = self.save_roll + save_bonus
 
-        return total >= self.owner.spell_DC, self.save_roll, advantage
+        return total <= (self.owner.spell_DC + bonus), self.save_roll, advantage
 
-    def calc_dmg(self, hit, roll, number, dice_type):
+    def calc_dmg(self, hit, roll, number, dice_type, bonus = 0):
         self.dmg = 0
         if roll == 20:
             for i in range(2 * number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
-            self.dmg += self.owner.spell_mod
+            self.dmg += self.owner.spell_mod + bonus
             return self.dmg
         elif not hit:
             return self.dmg
@@ -53,22 +53,24 @@ class Spell(ABC):
             for i in range(number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
-            self.dmg += self.owner.spell_mod
+            self.dmg += self.owner.spell_mod + bonus
         return self.dmg
 
-    def calc_dmg_save(self, hit, roll, half_dmg, number, dice_type):
+    def calc_dmg_save(self, hit, roll, half_dmg, number, dice_type, bonus = 0):
         self.dmg = 0
-        if roll == 20:
+        if roll == 1:
             for i in range(2 * number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
             self.dmg += self.owner.spell_mod
+            self.dmg += bonus
             return self.dmg
         elif not hit and half_dmg:
             for i in range(number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
             self.dmg += self.owner.spell_mod
+            self.dmg += bonus
             self.dmg //= 2
             return self.dmg
         elif not hit:
@@ -78,5 +80,6 @@ class Spell(ABC):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
             self.dmg += self.owner.spell_mod
+            self.dmg += bonus
 
         return self.dmg

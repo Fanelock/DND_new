@@ -1,5 +1,5 @@
 from ..Weapon_main import WeaponAttack
-from ..class_files import Rogue, Ranger
+from ..class_files import Rogue, Ranger, Gloomstalker, Cleric
 from .. import AttackHandler
 
 class Flintlock(WeaponAttack):
@@ -25,11 +25,19 @@ class Flintlock(WeaponAttack):
         self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
 
         if hunters_mark and hit:
-            self.dmg += self.owner.perform_huntersmark(hit)
+            self.dmg += self.owner.perform_huntersmark(hit, roll)
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
             sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
             self.dmg += sneak_dmg
+
+        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+            dread = self.owner.dreadful_strikes(hit, roll)
+            self.dmg += dread
+
+        if isinstance(self.owner, Cleric) and self.owner.level >= 7:
+            divine = self.owner.divine_strike(hit, roll)
+            self.dmg += divine
 
         return hit, roll, self.dmg
 
