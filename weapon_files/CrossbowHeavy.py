@@ -44,7 +44,7 @@ class CrossbowHeavy(WeaponAttack):
 
         return hit, roll, self.dmg
 
-    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False,
+    def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
                             include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0):
         total_damage = 0
         total_hit_damage = 0

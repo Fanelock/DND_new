@@ -331,7 +331,7 @@ class DND_GUI:
         hunters_mark = self.hunters_mark_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.weapon.simulate_attacks(
-            num_attacks=1000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery,
+            num_attacks=10000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery,
             include_crits=include_crits, sneak_attack = sneak_attack, hunters_mark=hunters_mark, bonus=bonus
         )
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
@@ -359,7 +359,7 @@ class DND_GUI:
             save_bonus=save_bonus,
             dice_number=dice_number,
             dice_type=dice_type,
-            num_attacks=1000,
+            num_attacks=10000,
             advantage=advantage,
             disadvantage=disadvantage,
             half_dmg=half_dmg,
