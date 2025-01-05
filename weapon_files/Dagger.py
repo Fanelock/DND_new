@@ -19,24 +19,36 @@ class Dagger(WeaponAttack):
             sneak_attack = True
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus = self.bonus)
+        hit2, roll2, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
+        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
 
         if hasattr(self, 'fighting_style') and callable(self.fighting_style) and fighting_style != "TWF":
-            damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
-        else:
-            damage = base_dmg
+            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
-        print("post fighting style:", self.dmg)
+        mastery_dmg = 0
+        if mastery:
+            mastery_dmg = self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus)
+            mastery_dmg -= (self.owner.dex if dex else self.owner.str)
+
+        twf_dmg = 0
+        if hasattr(self, 'fighting_style') and callable(self.fighting_style) and fighting_style == "TWF":
+            if mastery:
+                mastery_dmg += (self.owner.dex if dex else self.owner.str)
+            if not mastery:
+                twf_dmg = self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus)
+
+        self.dmg += mastery_dmg
+        self.dmg += twf_dmg
 
         if hunters_mark and hit:
-            damage += self.owner.perform_huntersmark(hit, roll)
+            self.dmg += self.owner.perform_huntersmark(hit, roll)
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
             sneak_attack_applied = False  # Flag to track if sneak attack has been applied
             #Apply sneak attack only once
-            if advantage and hit and not sneak_attack_applied:
-                sneak_dmg = self.owner.perform_sneak_attack(hit, advantage, roll)
+            if not sneak_attack_applied:
+                sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
                 self.dmg += sneak_dmg
                 sneak_attack_applied = True
 
@@ -48,11 +60,9 @@ class Dagger(WeaponAttack):
             divine = self.owner.divine_strike(hit, roll)
             self.dmg += divine
 
-        print("end dmg:", self.dmg)
+        return hit, roll, self.dmg
 
-        return hit, roll, base_dmg
-
-    def simulate_attacks(self, ac, num_attacks=1000, dex=False, advantage=False, disadvantage=False, mastery=False,
+    def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
                             include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0):
         total_damage = 0
         total_hit_damage = 0
@@ -61,16 +71,8 @@ class Dagger(WeaponAttack):
 
         attacks_per_action = 2 if getattr(self.owner, 'has_multiattack', False) else 1
 
-        if self.owner.level >= 5:
-            if mastery and self.owner.fighting_style != "TWF":
-                attacks_per_action += 1  # Add a mastery attack (without modifiers for mastery) if not TWF
-            if self.owner.fighting_style == "TWF":
-                attacks_per_action += 1  # Add an additional TWF attack (with modifiers)
-
-        elif self.owner.level < 5:
-            attacks_per_action = 2  # One normal and one mastery attack
-            if self.owner.fighting_style == "TWF":
-                attacks_per_action += 1
+        if mastery or self.owner.fighting_style == "TWF":
+            attacks_per_action += 1
 
         for _ in range(num_attacks):
             action_damage = 0
