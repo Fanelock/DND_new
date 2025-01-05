@@ -13,7 +13,7 @@ class SpellSave(Spell):
 
         return hit, roll, self.dmg
 
-    def simulate_attacks(self, ac=None, save_bonus=None, dice_number=0, dice_type=0, num_attacks=1000, advantage=False,
+    def simulate_attacks(self, ac=None, save_bonus=None, dice_number=0, dice_type=0, num_attacks=10000, advantage=False,
                         disadvantage=False, half_dmg=False, include_crits = False, sneak_attack = False, hunters_mark = False, bonus = 0):
         total_damage = 0
         total_hit_damage = 0

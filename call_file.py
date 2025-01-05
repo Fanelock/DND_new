@@ -276,10 +276,10 @@ class DND_GUI:
             )
             spell_name = self.spell_var.get()
 
-            if weapon_name != "None":
-                self.simulate_weapon(weapon_name)
-            elif spell_name != "None":
+            if spell_name != "None" and spell_name:
                 self.simulate_spell(spell_name)
+            elif weapon_name:
+                self.simulate_weapon(weapon_name)
             else:
                 raise ValueError("Please select a weapon or spell.")
         except Exception as e:
