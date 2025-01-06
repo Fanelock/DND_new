@@ -12,7 +12,7 @@ class Glaive(WeaponAttack):
         self.supports_sneak_attack = False
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite =False):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -23,8 +23,10 @@ class Glaive(WeaponAttack):
         self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus)
 
         if hunters_mark and hit:
-            huntersmark = self.owner.perform_huntersmark(hit, roll)
-            self.dmg += huntersmark
+            self.dmg += self.owner.perform_huntersmark(hit, roll)
+
+        if smite and hit:
+            self.dmg += self.owner.perform_smite(hit, roll)
 
         if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
             dread = self.owner.dreadful_strikes(hit, roll)
@@ -36,7 +38,7 @@ class Glaive(WeaponAttack):
         return hit, roll, self.dmg
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0):
+                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0, smite = False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -57,7 +59,8 @@ class Glaive(WeaponAttack):
                         fighting_style=self.owner.fighting_style,
                         sneak_attack=sneak_attack,
                         hunters_mark=hunters_mark,
-                        bonus=bonus
+                        bonus=bonus,
+                        smite=smite,
                     )
                     if include_crits or roll != 20:
                         break
@@ -66,15 +69,11 @@ class Glaive(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
-                if not hit and mastery:
-                    action_damage += self.owner.str
 
-            # Collect damage results
             results.append(action_damage)
             total_damage += action_damage
 
-        # Calculate averages
-        overall_avg_damage = total_damage / num_attacks
+        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
         hit_avg_damage = total_hit_damage / hit_count if hit_count > 0 else 0
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

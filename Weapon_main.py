@@ -51,6 +51,7 @@ class WeaponAttack(ABC):
         adjusted_dmg = 0
         if self.owner.level >= 2 and style != None:
             if style == "GWF" and self.weapon_type in {"Two-Handed", "Versatile"} and hit:
+                self.dmg = 0
                 if roll == 20:
                     for _ in range(2 * number):
                         dmg_roll = max(rd.randint(1, dice_type), 3)

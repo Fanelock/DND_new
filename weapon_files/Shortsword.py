@@ -12,7 +12,7 @@ class Shortsword(WeaponAttack):
         self.attack_counter = 1
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite =False):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -25,8 +25,12 @@ class Shortsword(WeaponAttack):
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
         self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
+
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit, roll)
+
+        if smite and hit:
+            self.dmg += self.owner.perform_smite(hit, roll)
 
         if fighting_style == "TWF":
             hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
@@ -53,7 +57,7 @@ class Shortsword(WeaponAttack):
         return hit, roll, self.dmg
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, sneak_attack=False, hunters_mark=False, bonus=0):
+                            include_crits=False, sneak_attack=False, hunters_mark=False, bonus=0, smite=False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -62,7 +66,6 @@ class Shortsword(WeaponAttack):
         attacks_per_action = 2 if getattr(self.owner, 'has_multiattack', False) else 1
         if self.owner.fighting_style == "TWF":
             attacks_per_action += 1
-
 
         for _ in range(num_attacks):
             action_damage = 0
@@ -77,7 +80,8 @@ class Shortsword(WeaponAttack):
                         fighting_style=self.owner.fighting_style,
                         sneak_attack=sneak_attack,
                         hunters_mark=hunters_mark,
-                        bonus = bonus
+                        bonus=bonus,
+                        smite=smite,
                     )
                     if include_crits or roll != 20:
                         break
@@ -87,13 +91,10 @@ class Shortsword(WeaponAttack):
                     total_hit_damage += damage
                     hit_count += 1
 
-
-            # Collect damage results
             results.append(action_damage)
             total_damage += action_damage
 
-        # Calculate averages
-        overall_avg_damage = total_damage / (attacks_per_action * num_attacks)
+        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
         hit_avg_damage = total_hit_damage / hit_count if hit_count > 0 else 0
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

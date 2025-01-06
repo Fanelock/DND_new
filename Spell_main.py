@@ -37,7 +37,7 @@ class Spell(ABC):
             self.save_roll = rd.randint(1, 20)
         total = self.save_roll + save_bonus
 
-        return total <= (self.owner.spell_DC + bonus), self.save_roll, advantage
+        return total >= (self.owner.spell_DC + bonus), self.save_roll, advantage
 
     def calc_dmg(self, hit, roll, number, dice_type, bonus = 0):
         self.dmg = 0

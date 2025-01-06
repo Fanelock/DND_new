@@ -6,15 +6,21 @@ class SpellSave(Spell):
         self.dmg = 0
         self.bonus = bonus
 
-    def perform_attack(self, save_bonus, dice_number, dice_type, advantage, disadvantage, half_dmg, sneak_attack = False, hunters_mark = False, bonus = 0):
+    def perform_attack(self, save_bonus, dice_number, dice_type, advantage, disadvantage, half_dmg, sneak_attack = False, hunters_mark = False, bonus = 0, smite = False):
         hit, roll, advantage = super().spell_save(save_bonus, advantage, disadvantage, bonus = self.bonus)
 
         self.dmg = self.calc_dmg_save(hit, roll, half_dmg, dice_number, dice_type, bonus = self.bonus)
 
+        if hunters_mark and hit:
+            self.dmg += self.owner.perform_huntersmark(hit, roll)
+
+        if smite and hit:
+            self.dmg += self.owner.perform_smite(hit, roll)
+
         return hit, roll, self.dmg
 
     def simulate_attacks(self, ac=None, save_bonus=None, dice_number=0, dice_type=0, num_attacks=10000, advantage=False,
-                        disadvantage=False, half_dmg=False, include_crits = False, sneak_attack = False, hunters_mark = False, bonus = 0):
+                        disadvantage=False, half_dmg=False, include_crits = False, sneak_attack = False, hunters_mark = False, bonus = 0, smite = False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -26,7 +32,7 @@ class SpellSave(Spell):
                     hit, roll, damage = self.perform_attack(ac, dice_number, dice_type, advantage, disadvantage, half_dmg, bonus = self.bonus)
                 elif save_bonus is not None:  # Spell Save
                     hit, roll, damage = self.perform_attack(save_bonus, dice_number, dice_type, advantage, disadvantage,
-                                        half_dmg, sneak_attack=sneak_attack, hunters_mark=hunters_mark, bonus = self.bonus)
+                                        half_dmg, sneak_attack=sneak_attack, hunters_mark=hunters_mark, bonus = self.bonus, smite=smite)
                 else:
                     raise ValueError("Either 'ac' or 'save_bonus' must be provided.")
                 if include_crits or roll != 1:

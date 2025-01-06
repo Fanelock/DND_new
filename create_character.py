@@ -43,7 +43,7 @@ class Create:
 
                     # Trigger subclass conversion if applicable
                     if isinstance(character, Ranger) and level >= 3:
-                        character = character.level_up(0)  # Check for subclass conversion without modifying level
+                        character = character.level_up()  # Check for subclass conversion without modifying level
 
                     character.name = name
                     self.characters[name] = character

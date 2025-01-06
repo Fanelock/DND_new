@@ -329,11 +329,13 @@ class DND_GUI:
         include_crits = self.include_crits_var.get()
         sneak_attack = self.sneak_attack_var.get()
         hunters_mark = self.hunters_mark_var.get()
+        smite = self.smite_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.weapon.simulate_attacks(
             num_attacks=10000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery,
-            include_crits=include_crits, sneak_attack = sneak_attack, hunters_mark=hunters_mark, bonus=bonus
+            include_crits=include_crits, sneak_attack = sneak_attack, hunters_mark=hunters_mark, bonus=bonus, smite=smite
         )
+
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 
     def simulate_spell(self, spell_name):
@@ -353,6 +355,7 @@ class DND_GUI:
         include_crits = self.include_crits_var.get()
         sneak_attack = self.sneak_attack_var.get()
         hunters_mark = self.hunters_mark_var.get()
+        smite = self.smite_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.spell.simulate_attacks(
             ac=ac,
@@ -366,7 +369,8 @@ class DND_GUI:
             include_crits = include_crits,
             sneak_attack = sneak_attack,
             hunters_mark = hunters_mark,
-            bonus = bonus
+            bonus = bonus,
+            smite = smite,
         )
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 

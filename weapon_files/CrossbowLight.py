@@ -12,7 +12,7 @@ class CrossbowLight(WeaponAttack):
         self.supports_sneak_attack = True
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite=False):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -27,6 +27,9 @@ class CrossbowLight(WeaponAttack):
 
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit, roll)
+
+        if smite and hit:
+            self.dmg += self.owner.perform_smite(hit, roll)
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
             sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
@@ -43,7 +46,7 @@ class CrossbowLight(WeaponAttack):
         return hit, roll, self.dmg
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0):
+                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0, smite = False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -62,9 +65,10 @@ class CrossbowLight(WeaponAttack):
                         disadvantage=disadvantage,
                         mastery=mastery,
                         fighting_style=self.owner.fighting_style,
-                        sneak_attack = sneak_attack,
+                        sneak_attack=sneak_attack,
                         hunters_mark=hunters_mark,
-                        bonus=bonus
+                        bonus=bonus,
+                        smite=smite,
                     )
                     if include_crits or roll != 20:
                         break

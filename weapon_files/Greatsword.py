@@ -1,7 +1,7 @@
 import random as rd
 from .. import AttackHandler
 from ..Weapon_main import WeaponAttack
-from ..class_files import Ranger, Gloomstalker, Cleric
+from ..class_files import Ranger, Gloomstalker, Cleric, Paladin
 
 
 class Greatsword(WeaponAttack):
@@ -14,7 +14,7 @@ class Greatsword(WeaponAttack):
         self.hit_count = 0
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, sneak_attack=False, hunters_mark=False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite=False):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -22,22 +22,25 @@ class Greatsword(WeaponAttack):
 
         base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
-        if hasattr(self, 'fighting_style') and callable(self.fighting_style):
+        if fighting_style and callable(self.fighting_style):
             damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
         else:
             damage = base_dmg
 
-        damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery)
+        damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery, smite)
 
         self.dmg = damage
 
         return hit, roll, self.dmg
 
-    def apply_bonus_damage(self, hit, roll, hunters_mark, mastery):
+    def apply_bonus_damage(self, hit, roll, hunters_mark, mastery, smite):
         bonus_damage = 0
 
         if hunters_mark and hit:
             bonus_damage += self.owner.perform_huntersmark(hit, roll)
+
+        if smite and hit:
+            bonus_damage += self.owner.perform_smite(hit, roll)
 
         if mastery and not hit:
             bonus_damage += self.owner.str
@@ -51,7 +54,7 @@ class Greatsword(WeaponAttack):
         return bonus_damage
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, hunters_mark=False, sneak_attack=False, bonus=0):
+                            include_crits=False, hunters_mark=False, sneak_attack=False, bonus=0, smite=False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -61,7 +64,7 @@ class Greatsword(WeaponAttack):
 
         for _ in range(num_attacks):
             action_damage = 0
-            for _ in range(attacks_per_action):
+            for _ in range(attacks_per_action):  # Perform multiple attacks in one action
                 while True:
                     hit, roll, damage = self.perform_attack(
                         ac=ac,
@@ -69,8 +72,11 @@ class Greatsword(WeaponAttack):
                         advantage=advantage,
                         disadvantage=disadvantage,
                         mastery=mastery,
+                        fighting_style=self.owner.fighting_style,
                         sneak_attack=sneak_attack,
-                        hunters_mark=hunters_mark
+                        hunters_mark=hunters_mark,
+                        bonus=bonus,
+                        smite=smite,
                     )
                     if include_crits or roll != 20:
                         break
