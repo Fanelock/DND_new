@@ -20,14 +20,17 @@ class Greatsword(WeaponAttack):
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
+        base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
+        print("normal damage:", base_dmg)
         if fighting_style and callable(self.fighting_style):
             damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
         else:
             damage = base_dmg
-
+        print("post fighint style:", damage)
         damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery, smite)
+
+        print("post bonus:", damage)
 
         self.dmg = damage
 
@@ -45,8 +48,8 @@ class Greatsword(WeaponAttack):
         if mastery and not hit:
             bonus_damage += self.owner.str
 
-        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
-            bonus_damage += self.owner.dreadful_strikes(hit, roll)
+        #if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+        #    bonus_damage += self.owner.dreadful_strikes(hit, roll)
 
         if isinstance(self.owner, Cleric) and self.owner.level >= 7:
             bonus_damage += self.owner.divine_strike(hit, roll)
@@ -78,6 +81,8 @@ class Greatsword(WeaponAttack):
                         bonus=bonus,
                         smite=smite,
                     )
+                    if not include_crits and roll == 20:
+                        roll = 19
                     if include_crits or roll != 20:
                         break
 

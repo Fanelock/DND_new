@@ -62,6 +62,8 @@ class Glaive(WeaponAttack):
                         bonus=bonus,
                         smite=smite,
                     )
+                    if not include_crits and roll == 20:
+                        roll = 19
                     if include_crits or roll != 20:
                         break
 
