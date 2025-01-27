@@ -82,6 +82,7 @@ class DND_GUI:
     def __init__(self, master):
         self.master = master
         self.master.title("DND Attack and Spell Simulation")
+        self.master.geometry("550x650+50+50")
 
         # Initialize variables
         self.create = Create()
@@ -100,8 +101,14 @@ class DND_GUI:
         self.character_frame = tk.LabelFrame(master, text="Loaded Characters")
         self.character_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        self.character_listbox = tk.Listbox(self.character_frame)
-        self.character_listbox.pack(fill="both", expand=True, padx=10, pady=10)
+        self.character_listbox = tk.Listbox(self.character_frame, height=8)
+        self.character_scrollbar = tk.Scrollbar(self.character_frame, orient=tk.VERTICAL)
+
+        self.character_listbox.config(yscrollcommand=self.character_scrollbar.set)
+        self.character_scrollbar.config(command=self.character_listbox.yview)
+
+        self.character_listbox.pack(side=tk.LEFT, fill="both", expand=True, padx=10, pady=10)
+        self.character_scrollbar.pack(side=tk.RIGHT, fill="y")
 
         # Weapon and spell selection
         selection_frame = tk.Frame(master)
@@ -378,6 +385,14 @@ class DND_GUI:
         result_window = tk.Toplevel(self.master)
         result_window.title("Simulation Results")
 
+        main_x = self.master.winfo_rootx()
+        main_y = self.master.winfo_rooty()
+        popup_width = 320
+        popup_height = 80
+        popup_x = main_x + 550  # Offset by 50px horizontally from main window
+        popup_y = main_y - 30  # Offset by 50px vertically from main window
+        result_window.geometry(f"{popup_width}x{popup_height}+{popup_x}+{popup_y}")
+
         result_text = (
             f"Average Damage: {round(avg_damage, 1)} (Includes Hit Probability)\n"
             f"Average Damage on Hit: {round(avg_hit_damage, 1)} (Excludes Hit Probability)\n"
@@ -393,11 +408,34 @@ class DND_GUI:
             messagebox.showerror("Error", "No damage results to plot.")
             return
 
-        plt.hist(damage_results, bins=10, alpha=0.75, color='purple')
-        plt.title("Damage Distribution")
-        plt.xlabel("Damage")
-        plt.ylabel("Frequency")
-        plt.show()
+        # Create the plot
+        fig, ax = plt.subplots()
+        ax.hist(damage_results, bins=10, alpha=0.75, color='purple')
+        ax.set_title("Damage Distribution")
+        ax.set_xlabel("Damage")
+        ax.set_ylabel("Frequency")
+
+        # Show the plot
+        plt.show(block=False)
+
+        # Position the plot window
+        try:
+            backend = plt.get_current_fig_manager()
+            main_x = self.master.winfo_rootx()
+            main_y = self.master.winfo_rooty()
+            plot_x = main_x + 550  # Offset horizontally
+            plot_y = main_y + 100  # Offset vertically
+
+            # TkAgg backend
+            if hasattr(backend, "window"):
+                backend.window.wm_geometry(f"+{plot_x}+{plot_y}")
+            # Other backends (fallback)
+            elif hasattr(backend, "canvas"):
+                backend.canvas.manager.window.wm_geometry(f"+{plot_x}+{plot_y}")
+            else:
+                print("Could not reposition the matplotlib window.")
+        except Exception as e:
+            print(f"Error repositioning plot: {e}")
 
 def run_gui():
     root = tk.Tk()
