@@ -1,6 +1,7 @@
 from ..Weapon_main import WeaponAttack
-from ..class_files import SneakAttack, Ranger, Rogue, Cleric, Gloomstalker
+from ..class_files import SneakAttack, Ranger, Rogue, Cleric, Gloomstalker, Druid
 from .. import AttackHandler
+import random as rd
 
 class Javelin(WeaponAttack):
     def __init__(self, owner, bonus = 0):
@@ -12,51 +13,52 @@ class Javelin(WeaponAttack):
         self.attack_counter = 1
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite =False):
-        if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite=False, strike= False):
+        if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
-
-        if self.owner == Rogue and advantage == True:
-            sneak_attack = True
-
-        if mastery:
-            advantage = self.attack_counter % 2 == 0
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
-        if hunters_mark and hit:
-            self.dmg += self.owner.perform_huntersmark(hit, roll)
+        base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
-        if fighting_style == "TWF":
-            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
-            self.dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex)
-            if hunters_mark and hit2:
-                self.dmg += self.owner.perform_huntersmark(hit2, roll2)
+        if fighting_style and callable(self.fighting_style):
+            damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
         else:
-            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
+            damage = base_dmg
+        damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery, smite, strike)
 
-        if smite and hit:
-            self.dmg += self.owner.perform_smite(hit, roll)
-
-        if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
-            sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
-            self.dmg += sneak_dmg
-
-        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
-            dread = self.owner.dreadful_strikes(hit, roll)
-            self.dmg += dread
-
-        if isinstance(self.owner, Cleric) and self.owner.level >= 7:
-            divine = self.owner.divine_strike(hit, roll)
-            self.dmg += divine
-
-        self.attack_counter += 1
+        self.dmg = damage
 
         return hit, roll, self.dmg
 
+    def apply_bonus_damage(self, hit, roll, hunters_mark, mastery, smite, strike):
+        bonus_damage = 0
+
+        if hunters_mark and hit:
+            bonus_damage += self.owner.perform_huntersmark(hit, roll)
+
+        if smite and hit:
+            bonus_damage += self.owner.perform_smite(hit, roll)
+
+        if mastery and not hit:
+            bonus_damage += self.owner.str
+
+        if strike and self.owner.level >= 7:
+            if hasattr(self.owner, "divine_strike"):
+                bonus_damage += self.owner.divine_strike(hit, roll)
+            elif hasattr(self.owner, "primal_strike"):
+                bonus_damage += self.owner.primal_strike(hit, roll)
+
+        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+            p = rd.randint(1, 8)
+            if self.owner.wis <= p:
+                bonus_damage += self.owner.dreadful_strikes(hit, roll)
+            bonus_damage += 0
+
+        return bonus_damage
+
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, sneak_attack=False, hunters_mark=False, bonus=0, smite =False):
+                            include_crits=False, sneak_attack=False, hunters_mark=False, bonus=0, smite =False, strike=False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -81,6 +83,7 @@ class Javelin(WeaponAttack):
                         hunters_mark=hunters_mark,
                         bonus=bonus,
                         smite=smite,
+                        strike=strike
                     )
                     if not include_crits and roll == 20:
                         roll = 19
@@ -96,7 +99,7 @@ class Javelin(WeaponAttack):
             total_damage += action_damage
 
         overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
-        hit_avg_damage = total_hit_damage / hit_count if hit_count > 0 else 0
+        hit_avg_damage = total_damage / num_attacks
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 

@@ -9,8 +9,9 @@ from .Gloomstalker_subclass import Gloomstalker
 from .Paladin_class import Paladin
 from .Vengeance_subclass import Vengeance
 from .Warlock_class import Warlock
+from .Druid_class import Druid
 
 
-__all__ = ["Rogue", "Ranger", "Gloomstalker", "SneakAttack", "Fighter", "Cleric", "Sorcerer", "Paladin", "Vengeance", "Warlock"]
+__all__ = ["Rogue", "Ranger", "Gloomstalker", "SneakAttack", "Fighter", "Cleric", "Sorcerer", "Paladin", "Vengeance", "Warlock", "Druid"]
 
 

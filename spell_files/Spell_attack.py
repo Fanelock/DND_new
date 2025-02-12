@@ -6,10 +6,13 @@ class SpellAttack(Spell):
         self.dmg = 0
         self.bonus = bonus
 
-    def perform_attack(self, ac, dice_Number, dice_Type, advantage, disadvantage, sneak_attack = False, hunters_mark = False, bonus = 0, smite = False):
+    def perform_attack(self, ac, dice_Number, dice_Type, advantage, disadvantage, sneak_attack = False, hunters_mark = False, bonus = 0, smite = False, cantrip_mod = False):
         hit, roll, advantage = super().spell_attack(ac, advantage, disadvantage, bonus = self.bonus)
 
         self.dmg = self.calc_dmg(hit, roll, dice_Number, dice_Type, bonus = self.bonus)
+
+        if cantrip_mod:
+            self.dmg += self.owner.spell_mod
 
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit, roll)
@@ -20,7 +23,7 @@ class SpellAttack(Spell):
         return hit, roll, self.dmg
 
     def simulate_attacks(self, ac=None, save_bonus=None, dice_number=0, dice_type=0, num_attacks=10000, advantage=False,
-                            disadvantage=False, half_dmg=False, sneak_attack = False, hunters_mark=False, include_crits = False, bonus = 0, smite = False):
+                            disadvantage=False, half_dmg=False, sneak_attack = False, hunters_mark=False, include_crits = False, bonus = 0, smite = False, cantrip_mod = False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -29,10 +32,10 @@ class SpellAttack(Spell):
         for _ in range(num_attacks):
             while True:
                 if ac > 0:  # Spell Attack
-                    hit, roll, damage = self.perform_attack(ac, dice_number, dice_type, advantage, disadvantage, sneak_attack=sneak_attack, hunters_mark=hunters_mark, bonus = self.bonus, smite = smite)
+                    hit, roll, damage = self.perform_attack(ac, dice_number, dice_type, advantage, disadvantage, sneak_attack=sneak_attack, hunters_mark=hunters_mark, bonus = self.bonus, smite = smite, cantrip_mod=cantrip_mod)
                 elif save_bonus is not None:  # Spell Save
                     hit, roll, damage = self.perform_attack(save_bonus, dice_number, dice_type, advantage, disadvantage,
-                                                            half_dmg, sneak_attack=sneak_attack, hunters_mark=hunters_mark, bonus = self.bonus)
+                                                            half_dmg, sneak_attack=sneak_attack, hunters_mark=hunters_mark, bonus = self.bonus, cantrip_mod=cantrip_mod)
                 else:
                     raise ValueError("Either 'ac' or 'save_bonus' must be provided.")
                 if include_crits or roll != 20:
