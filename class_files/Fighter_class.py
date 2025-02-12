@@ -15,6 +15,10 @@ class Fighter(ABC):
         self.spell_mod = spell_mod
         self.spell_DC = spell_DC
 
+    @property
+    def has_multiattack(self):
+        return self.level >= 5
+
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
 

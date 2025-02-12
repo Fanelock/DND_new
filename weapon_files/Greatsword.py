@@ -1,7 +1,7 @@
 import random as rd
 from .. import AttackHandler
 from ..Weapon_main import WeaponAttack
-from ..class_files import Ranger, Gloomstalker, Cleric, Paladin
+from ..class_files import Ranger, Gloomstalker, Cleric, Paladin, Druid
 
 
 class Greatsword(WeaponAttack):
@@ -14,12 +14,11 @@ class Greatsword(WeaponAttack):
         self.hit_count = 0
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite=False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite=False, strike = False):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
-
 
         base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
 
@@ -27,13 +26,13 @@ class Greatsword(WeaponAttack):
             damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
         else:
             damage = base_dmg
-        damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery, smite)
+        damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery, smite, strike)
 
         self.dmg = damage
 
         return hit, roll, self.dmg
 
-    def apply_bonus_damage(self, hit, roll, hunters_mark, mastery, smite):
+    def apply_bonus_damage(self, hit, roll, hunters_mark, mastery, smite, strike):
         bonus_damage = 0
 
         if hunters_mark and hit:
@@ -45,16 +44,22 @@ class Greatsword(WeaponAttack):
         if mastery and not hit:
             bonus_damage += self.owner.str
 
-        if isinstance(self.owner, Cleric) and self.owner.level >= 7:
-            bonus_damage += self.owner.divine_strike(hit, roll)
+        if strike and self.owner.level >= 7:
+            if hasattr(self.owner, "divine_strike"):
+                bonus_damage += self.owner.divine_strike(hit, roll)
+            elif hasattr(self.owner, "primal_strike"):
+                bonus_damage += self.owner.primal_strike(hit, roll)
 
         if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
-            bonus_damage += self.owner.dreadful_strikes(hit, roll)
+            p = rd.randint(1, 8)
+            if self.owner.wis <= p:
+                bonus_damage += self.owner.dreadful_strikes(hit, roll)
+            bonus_damage += 0
 
         return bonus_damage
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, hunters_mark=False, sneak_attack=False, bonus=0, smite=False):
+                            include_crits=False, hunters_mark=False, sneak_attack=False, bonus=0, smite=False, strike = False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -77,6 +82,7 @@ class Greatsword(WeaponAttack):
                         hunters_mark=hunters_mark,
                         bonus=bonus,
                         smite=smite,
+                        strike=strike
                     )
                     if not include_crits and roll == 20:
                         roll = 19
@@ -92,7 +98,7 @@ class Greatsword(WeaponAttack):
             total_damage += action_damage
 
         overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
-        hit_avg_damage = total_hit_damage / hit_count if hit_count > 0 else 0
+        hit_avg_damage = total_damage / num_attacks
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 

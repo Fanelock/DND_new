@@ -237,6 +237,14 @@ class DND_GUI:
         self.pact_weapon_checkbox = tk.Checkbutton(parameters_frame, text="Pact Weapon", variable=self.pact_weapon_var)
         self.pact_weapon_checkbox.grid(row=5, column=0, padx=10, pady=5, sticky="w")
 
+        self.strike_var = tk.BooleanVar()
+        self.strike_checkbox = tk.Checkbutton(parameters_frame, text="Primal/Blessed Strike", variable=self.strike_var)
+        self.strike_checkbox.grid(row=5, column=1, padx=10, pady=5, sticky="w")
+
+        self.cantrip_mod_var = tk.BooleanVar()
+        self.cantrip_mod_checkbox = tk.Checkbutton(parameters_frame, text="Cantrip Mod", variable=self.cantrip_mod_var)
+        self.cantrip_mod_checkbox.grid(row=5, column=2, padx=10, pady=5, sticky="w")
+
         # Run Simulation Button
         self.run_button = tk.Button(master, text="Run Simulation", state=tk.DISABLED, command=self.run_simulation)
         self.run_button.pack(pady=10)
@@ -337,10 +345,11 @@ class DND_GUI:
         sneak_attack = self.sneak_attack_var.get()
         hunters_mark = self.hunters_mark_var.get()
         smite = self.smite_var.get()
+        strike = self.strike_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.weapon.simulate_attacks(
             num_attacks=10000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery,
-            include_crits=include_crits, sneak_attack = sneak_attack, hunters_mark=hunters_mark, bonus=bonus, smite=smite
+            include_crits=include_crits, sneak_attack = sneak_attack, hunters_mark=hunters_mark, bonus=bonus, smite=smite, strike = strike
         )
 
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
@@ -363,6 +372,7 @@ class DND_GUI:
         sneak_attack = self.sneak_attack_var.get()
         hunters_mark = self.hunters_mark_var.get()
         smite = self.smite_var.get()
+        cantrip_mod = self.cantrip_mod_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.spell.simulate_attacks(
             ac=ac,
@@ -378,6 +388,7 @@ class DND_GUI:
             hunters_mark = hunters_mark,
             bonus = bonus,
             smite = smite,
+            cantrip_mod = cantrip_mod,
         )
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
 
@@ -394,8 +405,8 @@ class DND_GUI:
         result_window.geometry(f"{popup_width}x{popup_height}+{popup_x}+{popup_y}")
 
         result_text = (
-            f"Average Damage: {round(avg_damage, 1)} (Includes Hit Probability)\n"
-            f"Average Damage on Hit: {round(avg_hit_damage, 1)} (Excludes Hit Probability)\n"
+            f"Average Damage per Hit: {round(avg_damage, 1)}\n"
+            f"Average Damage per Turn: {round(avg_hit_damage, 1)}\n"
             f"Number of Hits: {hit_count}\n"
             f"Total Hit Damage: {total_hit_damage}"
         )

@@ -1,6 +1,7 @@
 from ..Weapon_main import WeaponAttack
 from ..class_files import SneakAttack
-from ..class_files import Rogue, Ranger, Gloomstalker, Cleric
+from ..class_files import Rogue, Ranger, Gloomstalker, Cleric, Paladin, Druid
+import random as rd
 
 class Dagger(WeaponAttack):
     def __init__(self, owner, bonus = 0):
@@ -11,7 +12,7 @@ class Dagger(WeaponAttack):
         self.supports_sneak_attack = True
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite = False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite = False, strike = False):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -56,17 +57,21 @@ class Dagger(WeaponAttack):
                 sneak_attack_applied = True
 
         if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
-            dread = self.owner.dreadful_strikes(hit, roll)
-            self.dmg += dread
+            p = rd.randint(1, 8)
+            if self.owner.wis <= p:
+                self.dmg += self.owner.dreadful_strikes(hit, roll)
+            self.dmg += 0
 
-        if isinstance(self.owner, Cleric) and self.owner.level >= 7:
-            divine = self.owner.divine_strike(hit, roll)
-            self.dmg += divine
+        if strike and self.owner.level >= 7:
+            if hasattr(self.owner, "divine_strike"):
+                self.dmg += self.owner.divine_strike(hit, roll)
+            elif hasattr(self.owner, "primal_strike"):
+                self.dmg += self.owner.primal_strike(hit, roll)
 
         return hit, roll, self.dmg
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0, smite=False):
+                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0, smite=False, strike = False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -92,6 +97,7 @@ class Dagger(WeaponAttack):
                         hunters_mark=hunters_mark,
                         bonus=bonus,
                         smite=smite,
+                        strike=strike,
                     )
                     if not include_crits and roll == 20:
                         roll = 19
@@ -108,8 +114,8 @@ class Dagger(WeaponAttack):
             total_damage += action_damage
 
         # Calculate averages
-        overall_avg_damage = total_damage / num_attacks
-        hit_avg_damage = total_hit_damage / hit_count if hit_count > 0 else 0
+        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        hit_avg_damage = total_damage / num_attacks
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 
