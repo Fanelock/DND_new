@@ -48,7 +48,7 @@ class SpellAttack(Spell):
                 hit_count += 1
 
         overall_avg_damage = total_damage / num_attacks
-        hit_avg_damage = total_hit_damage / hit_count if hit_count > 0 else 0
+        hit_avg_damage = total_hit_damage / num_attacks
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 
