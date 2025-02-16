@@ -1,7 +1,7 @@
 from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock, CrossbowLight, \
                                         CrossbowHeavy, Flail, Warhammer, Javelin
 from DND_weapons.spell_files import SpellAttack, SpellSave
-from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker, Paladin, Vengeance, Warlock
+from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker, Paladin, Vengeance, Warlock, Druid
 from DND_weapons.Attack import AttackHandler
 from DND_weapons.SpellAttack import SpellAttackHandler
 import tkinter as tk
@@ -15,66 +15,6 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import time
-
-"""
-
-Fane = Gloomstalker(3,"GWF", 3, 2, 3, 1, 3, 2, 2, 3, 13)
-
-Fane_Greatsword = Greatsword(Fane)
-
-hit_counter = 0
-total_damage = 0
-
-# Perform 1000 attacks
-for i in range(1000):
-    hit, roll, damage = Fane_Greatsword.perform_attack(
-        ac=15,
-        dex=False,
-        advantage=False,
-        disadvantage=False,
-        mastery=True,
-        fighting_style=Fane.fighting_style,
-        hunters_mark=True
-    )
-    total_damage += damage
-    if hit:
-        hit_counter += 1
-
-# Calculate average damage
-average_damage = total_damage / 1000
-
-# Print results
-print(f"Total Hits: {hit_counter}")
-print(f"Total Damage: {total_damage}")
-print(f"Average Damage: {average_damage}")
-
-
-Sorcerer = Sorcerer("name", "type", None, 1, 1, 2, 2, 2, 4, 2, 4, 14)
-
-spell_save = SpellSave(Sorcerer)
-
-save_bonus = 5  # Target's save bonus
-dice_number = 2  # Number of damage dice
-dice_type = 6  # Type of damage dice
-advantage = False  # No advantage
-disadvantage = False  # No disadvantage
-half_dmg = True  # Target takes half damage on a successful save
-
-# Perform the spell save attack
-hit, roll, damage = spell_save.perform_attack(
-    save_bonus=save_bonus,
-    dice_number=dice_number,
-    dice_type=dice_type,
-    advantage=advantage,
-    disadvantage=disadvantage,
-    half_dmg=half_dmg
-)
-
-print(f"Hit: {hit}")
-print(f"Roll: {roll}")
-print(f"Damage: {damage}")
-
-"""
 
 #start_time = time.time()
 
@@ -312,8 +252,17 @@ class DND_GUI:
     def simulate_weapon(self, weapon_name):
         bonus = self.get_bonus()
 
-        if self.pact_weapon_var.get():
-            self.character.str = self.character.cha
+        class_instance = next((cls for cls in self.character if hasattr(cls, 'fighting_style')), None)
+
+        if not class_instance:
+            messagebox.showerror("Error", "No valid class with a fighting style found for the selected character.")
+            return
+
+        class_instance = next((cls for cls in self.character if hasattr(cls, 'cha')), None)
+
+        if class_instance:
+            if self.pact_weapon_var.get():
+                class_instance.str = class_instance.cha
 
         weapon_mapping = {
             "Greatsword": lambda owner: Greatsword(owner, bonus),
@@ -332,7 +281,7 @@ class DND_GUI:
 
         # Initialize the selected weapon
         if weapon_name in weapon_mapping:
-            self.weapon = weapon_mapping[weapon_name](self.character)
+            self.weapon = weapon_mapping[weapon_name](class_instance)
         else:
             raise ValueError(f"Weapon '{weapon_name}' not recognized.")
 
@@ -405,8 +354,7 @@ class DND_GUI:
         result_window.geometry(f"{popup_width}x{popup_height}+{popup_x}+{popup_y}")
 
         result_text = (
-            f"Average Damage per Hit: {round(avg_damage, 1)}\n"
-            f"Average Damage per Turn: {round(avg_hit_damage, 1)}\n"
+            f"Average Damage per Turn: {round(avg_damage, 1)}\n"
             f"Number of Hits: {hit_count}\n"
             f"Total Hit Damage: {total_hit_damage}"
         )

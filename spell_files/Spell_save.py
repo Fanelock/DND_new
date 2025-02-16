@@ -11,8 +11,12 @@ class SpellSave(Spell):
 
         self.dmg = self.calc_dmg_save(hit, roll, half_dmg, dice_number, dice_type, bonus = self.bonus)
 
-        if cantrip_mod:
-            self.dmg += self.owner.spell_mod
+        if cantrip_mod and hit:
+            class_instance = next((cls for cls in self.owner if hasattr(cls, 'spell_mod')), None)
+            if class_instance:
+                self.dmg += class_instance.spell_mod
+            else:
+                print("No class instance with 'spell_mod' found!")
 
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit, roll)
@@ -47,7 +51,7 @@ class SpellSave(Spell):
                 hit_count += 1
 
         overall_avg_damage = total_damage / num_attacks
-        hit_avg_damage = total_hit_damage / num_attacks
+        hit_avg_damage = total_damage / num_attacks
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 
