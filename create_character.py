@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import os
-from DND_weapons.class_files import Ranger, Rogue, Sorcerer, Cleric, Fighter, Gloomstalker, Paladin, Warlock
+from DND_weapons.class_files import Ranger, Rogue, Sorcerer, Cleric, Fighter, Gloomstalker, Paladin, Warlock, Druid, Vengeance
 
 class Create:
     def __init__(self, file=None):
@@ -77,7 +77,9 @@ class Create:
                             "Cleric": Cleric,
                             "Sorcerer": Sorcerer,
                             "Paladin": Paladin,
-                            "Warlock": Warlock
+                            "Warlock": Warlock,
+                            "Druid": Druid,
+                            "Vengeance": Vengeance
                         }
 
                         if class_name in class_mapping:
