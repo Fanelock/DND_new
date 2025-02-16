@@ -50,7 +50,7 @@ class Longbow(WeaponAttack):
 
         if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
             p = rd.randint(1, 8)
-            if self.owner.wis <= p:
+            if p <= self.owner.wis:
                 bonus_damage += self.owner.dreadful_strikes(hit, roll)
             bonus_damage += 0
 

@@ -47,7 +47,7 @@ class Shortsword(WeaponAttack):
 
         if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
             p = rd.randint(1, 8)
-            if self.owner.wis <= p:
+            if p <= self.owner.wis:
                 self.dmg += self.owner.dreadful_strikes(hit, roll)
             self.dmg += 0
 
