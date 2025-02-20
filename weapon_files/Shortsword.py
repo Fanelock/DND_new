@@ -13,7 +13,7 @@ class Shortsword(WeaponAttack):
         self.attack_counter = 1
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite =False, strike = False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite =False, strike = False, include_crits=False):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -25,7 +25,7 @@ class Shortsword(WeaponAttack):
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
+        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
 
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit, roll)
@@ -35,27 +35,27 @@ class Shortsword(WeaponAttack):
 
         if fighting_style == "TWF":
             hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
-            self.dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex)
+            self.dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex, include_crits=include_crits)
             if hunters_mark and hit2:
                 self.dmg += self.owner.perform_huntersmark(hit2, roll2)
         else:
-            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus)
+            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
-            sneak_dmg = self.owner.perform_sneak_attack(hit, roll)
+            sneak_dmg = self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
             self.dmg += sneak_dmg
 
         if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
             p = rd.randint(1, 8)
             if p <= self.owner.wis:
-                self.dmg += self.owner.dreadful_strikes(hit, roll)
+                self.dmg += self.owner.dreadful_strikes(hit, roll, include_crits=include_crits)
             self.dmg += 0
 
         if strike and self.owner.level >= 7:
             if hasattr(self.owner, "divine_strike"):
-                self.dmg += self.owner.divine_strike(hit, roll)
+                self.dmg += self.owner.divine_strike(hit, roll, include_crits=include_crits)
             elif hasattr(self.owner, "primal_strike"):
-                self.dmg += self.owner.primal_strike(hit, roll)
+                self.dmg += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
         self.attack_counter += 1
 
@@ -75,24 +75,20 @@ class Shortsword(WeaponAttack):
         for _ in range(num_attacks):
             action_damage = 0
             for _ in range(attacks_per_action):  # Perform multiple attacks in one action
-                while True:
-                    hit, roll, damage = self.perform_attack(
-                        ac=ac,
-                        dex=dex,
-                        advantage=advantage,
-                        disadvantage=disadvantage,
-                        mastery=mastery,
-                        fighting_style=self.owner.fighting_style,
-                        sneak_attack=sneak_attack,
-                        hunters_mark=hunters_mark,
-                        bonus=bonus,
-                        smite=smite,
-                        strike=strike
-                    )
-                    if not include_crits and roll == 20:
-                        roll = 19
-                    if include_crits or roll != 20:
-                        break
+                hit, roll, damage = self.perform_attack(
+                    ac=ac,
+                    dex=dex,
+                    advantage=advantage,
+                    disadvantage=disadvantage,
+                    mastery=mastery,
+                    fighting_style=self.owner.fighting_style,
+                    sneak_attack=sneak_attack,
+                    hunters_mark=hunters_mark,
+                    bonus=bonus,
+                    smite=smite,
+                    strike=strike,
+                    include_crits=include_crits
+                )
 
                 action_damage += damage
                 if hit:

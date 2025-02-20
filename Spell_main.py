@@ -46,9 +46,9 @@ class Spell(ABC):
 
         return total >= (self.get_owner_attribute('spell_DC') + bonus), self.save_roll, advantage
 
-    def calc_dmg(self, hit, roll, number, dice_type, bonus = 0):
+    def calc_dmg(self, hit, roll, number, dice_type, bonus = 0, include_crits=False):
         self.dmg = 0
-        if roll == 20:
+        if roll == 20 and include_crits == True:
             for i in range(2 * number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
@@ -63,9 +63,9 @@ class Spell(ABC):
             self.dmg += bonus
         return self.dmg
 
-    def calc_dmg_save(self, hit, roll, half_dmg, number, dice_type, bonus = 0):
+    def calc_dmg_save(self, hit, roll, half_dmg, number, dice_type, bonus = 0, include_crits=False):
         self.dmg = 0
-        if roll == 1:
+        if roll == 1 and include_crits == True:
             for i in range(2 * number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll

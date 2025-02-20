@@ -23,8 +23,8 @@ class Ranger(ABC):
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
 
-    def perform_huntersmark(self, hit, roll):
-        return HuntersMark.hunters_mark_dmg(hit, self.level, roll)
+    def perform_huntersmark(self, hit, roll, include_crits):
+        return HuntersMark.hunters_mark_dmg(hit, self.level, roll, include_crits)
 
     def HuntersmarkAdv(self, level, hunters_mark):
         return level >= 13 and hunters_mark

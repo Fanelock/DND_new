@@ -23,8 +23,8 @@ class Paladin(ABC):
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
 
-    def perform_smite(self, hit, roll):
-        return Smite.smite_dmg(hit, roll)
+    def perform_smite(self, hit, roll, include_crits):
+        return Smite.smite_dmg(hit, roll, include_crits)
 
     def level_up(self):
         # Check if subclass present

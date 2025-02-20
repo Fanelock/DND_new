@@ -10,12 +10,12 @@ class HuntersMark(WeaponAttack):
         pass
 
     @staticmethod
-    def hunters_mark_dmg(hit, level, roll):
+    def hunters_mark_dmg(hit, level, roll, include_crits):
         dice_type = 8 if level >= 8 else 6
         if not hit:
             return 0
-        elif roll == 20:
-            return sum([rd.randint(1, dice_type) for _ in range(2) if roll == 20])
+        elif roll == 20 and include_crits == True:
+            return sum([rd.randint(1, dice_type) for _ in range(2)])
         return rd.randint(1, dice_type)
 
     def __str__(self):

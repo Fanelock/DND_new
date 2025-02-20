@@ -1,5 +1,6 @@
+from DND_weapons import Shortbow
 from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock, CrossbowLight, \
-                                        CrossbowHeavy, Flail, Warhammer, Javelin
+                                        CrossbowHeavy, Flail, Warhammer, Javelin, Rapier
 from DND_weapons.spell_files import SpellAttack, SpellSave
 from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker, Paladin, Vengeance, Warlock, Druid
 from DND_weapons.Attack import AttackHandler
@@ -78,7 +79,7 @@ class DND_GUI:
 
         self.weapon_var = tk.StringVar(value="None")
         self.weapon_dropdown = tk.OptionMenu(
-            selection_frame, self.weapon_var, "None", "Greatsword", "Shortsword", "Longsword", "Glaive", "Flail", "Warhammer")
+            selection_frame, self.weapon_var, "None", "Greatsword", "Shortsword", "Longsword", "Glaive", "Flail", "Warhammer", "Rapier")
         self.weapon_dropdown.grid(row=1, column=1, padx=10, pady=5)
 
         self.weapon_ranged_label = tk.Label(selection_frame, text="Ranged Weapons:")
@@ -86,8 +87,8 @@ class DND_GUI:
 
         self.weapon_ranged_var = tk.StringVar(value="None")
         self.weapon_ranged_dropdown = tk.OptionMenu(
-            selection_frame, self.weapon_ranged_var, "None", "Longbow", "Flintlock",
-            "Light Crossbow", "Heavy Crossbow")
+            selection_frame, self.weapon_ranged_var, "None", "Shortbow", "Longbow",
+            "Light Crossbow", "Heavy Crossbow", "Flintlock")
         self.weapon_ranged_dropdown.grid(row=1, column=2, padx=10, pady=5)
 
         self.spell_label = tk.Label(selection_frame, text="Select Spell:")
@@ -276,7 +277,9 @@ class DND_GUI:
             "Heavy Crossbow": lambda owner: CrossbowHeavy(owner, bonus),
             "Flail": lambda owner: Flail(owner, bonus),
             "Warhammer": lambda owner: Warhammer(owner, bonus),
-            "Javelin": lambda owner: Javelin(owner, bonus)
+            "Javelin": lambda owner: Javelin(owner, bonus),
+            "Rapier": lambda owner: Rapier(owner, bonus),
+            "Shortbow": lambda owner: Shortbow(owner, bonus)
         }
 
         # Initialize the selected weapon

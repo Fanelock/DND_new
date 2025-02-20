@@ -8,5 +8,5 @@ class Vengeance(Paladin):
         super().__init__(level, "Vengeance", fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod,
                     cha_mod, prof_bonus, spell_mod, spell_DC)
 
-    def perform_huntersmark(self, hit, roll):
-        return HuntersMark.hunters_mark_dmg(hit, self.level, roll)
+    def perform_huntersmark(self, hit, roll, include_crits):
+        return HuntersMark.hunters_mark_dmg(hit, self.level, roll, include_crits)

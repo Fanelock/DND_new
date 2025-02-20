@@ -27,9 +27,9 @@ class WeaponAttack(ABC):
 
         return total >= ac, self.hit_roll, advantage
 
-    def calc_dmg(self, hit, roll, number, dice_type, dex, bonus=0):
+    def calc_dmg(self, hit, roll, number, dice_type, dex, bonus=0, include_crits = False):
         self.dmg = 0
-        if roll == 20:
+        if roll == 20 and include_crits == True:
             for i in range(2 * number):
                 dmg_roll = rd.randint(1, dice_type)
                 self.dmg += dmg_roll
@@ -46,13 +46,13 @@ class WeaponAttack(ABC):
             self.dmg += bonus
         return self.dmg
 
-    def fighting_style(self, hit, roll, number, dice_type, dex, bonus=0):
+    def fighting_style(self, hit, roll, number, dice_type, dex, bonus=0, include_crits = False):
         style = self.owner.fighting_style
         adjusted_dmg = 0
         if self.owner.level >= 2 and style != None:
             if style == "GWF" and self.weapon_type in {"Two-Handed", "Versatile"} and hit:
                 self.dmg = 0
-                if roll == 20:
+                if roll == 20 and include_crits == True:
                     for _ in range(2 * number):
                         dmg_roll = max(rd.randint(1, dice_type), 3)
                         adjusted_dmg += dmg_roll

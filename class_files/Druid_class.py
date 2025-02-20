@@ -19,11 +19,11 @@ class Druid(ABC):
     def attack(self, dex, advantage, disadvantage, mastery, fighting_style):
         pass
 
-    def primal_strike(self, hit, roll):
+    def primal_strike(self, hit, roll, include_crits):
         dice_number = 2 if self.level >= 15 else 1
         if not hit:
             return 0
-        elif roll == 20:
+        elif roll == 20 and include_crits == True:
             return sum([rd.randint(1, 8) for _ in range(dice_number * 2)])
         return sum([rd.randint(1, 8) for _ in range(dice_number)])
 

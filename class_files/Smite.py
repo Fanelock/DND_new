@@ -10,11 +10,11 @@ class Smite(WeaponAttack):
         pass
 
     @staticmethod
-    def smite_dmg(hit, roll):
+    def smite_dmg(hit, roll, include_crits):
         dice_type = 8
         if not hit:
             return 0
-        elif roll == 20:
+        elif roll == 20 and include_crits == True:
             return sum([rd.randint(1, dice_type) for _ in range(4)])
         return sum([rd.randint(1, dice_type) for _ in range(2)])
 
