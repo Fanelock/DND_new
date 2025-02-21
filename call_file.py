@@ -183,7 +183,7 @@ class DND_GUI:
         self.strike_checkbox.grid(row=5, column=1, padx=10, pady=5, sticky="w")
 
         self.cantrip_mod_var = tk.BooleanVar()
-        self.cantrip_mod_checkbox = tk.Checkbutton(parameters_frame, text="Cantrip Mod", variable=self.cantrip_mod_var)
+        self.cantrip_mod_checkbox = tk.Checkbutton(parameters_frame, text="Add Spell Mod.", variable=self.cantrip_mod_var)
         self.cantrip_mod_checkbox.grid(row=5, column=2, padx=10, pady=5, sticky="w")
 
         # Run Simulation Button
