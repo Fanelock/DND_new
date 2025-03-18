@@ -49,7 +49,7 @@ class SpellSave(Spell):
                 hit_count += 1
 
         overall_avg_damage = total_damage / num_attacks
-        hit_avg_damage = total_damage / num_attacks
+        hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 

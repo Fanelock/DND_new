@@ -92,7 +92,7 @@ class Glaive(WeaponAttack):
             total_damage += action_damage
 
         overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
-        hit_avg_damage = total_hit_damage / num_attacks
+        hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 

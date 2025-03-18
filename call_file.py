@@ -1,6 +1,6 @@
 from DND_weapons import Shortbow
 from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock, CrossbowLight, \
-                                        CrossbowHeavy, Flail, Warhammer, Javelin, Rapier
+                                        CrossbowHeavy, Flail, Warhammer, Javelin, Rapier, Shortbow
 from DND_weapons.spell_files import SpellAttack, SpellSave
 from DND_weapons.class_files import Rogue, Ranger, Cleric, Fighter, Sorcerer, Gloomstalker, Paladin, Vengeance, Warlock, Druid
 from DND_weapons.Attack import AttackHandler
@@ -183,7 +183,7 @@ class DND_GUI:
         self.strike_checkbox.grid(row=5, column=1, padx=10, pady=5, sticky="w")
 
         self.cantrip_mod_var = tk.BooleanVar()
-        self.cantrip_mod_checkbox = tk.Checkbutton(parameters_frame, text="Add Spell Mod.", variable=self.cantrip_mod_var)
+        self.cantrip_mod_checkbox = tk.Checkbutton(parameters_frame, text="Add Spell Mod", variable=self.cantrip_mod_var)
         self.cantrip_mod_checkbox.grid(row=5, column=2, padx=10, pady=5, sticky="w")
 
         # Run Simulation Button
@@ -300,8 +300,18 @@ class DND_GUI:
         strike = self.strike_var.get()
 
         damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage = self.weapon.simulate_attacks(
-            num_attacks=10000, ac=ac, dex=dex, advantage=advantage, disadvantage=disadvantage, mastery = mastery,
-            include_crits=include_crits, sneak_attack = sneak_attack, hunters_mark=hunters_mark, bonus=bonus, smite=smite, strike = strike
+            num_attacks=10000,
+            ac=ac,
+            dex=dex,
+            advantage=advantage,
+            disadvantage=disadvantage,
+            mastery = mastery,
+            include_crits=include_crits,
+            sneak_attack = sneak_attack,
+            hunters_mark=hunters_mark,
+            bonus=bonus,
+            smite=smite,
+            strike = strike
         )
 
         self.display_results(damage_results, avg_damage, avg_hit_damage, hit_count, total_hit_damage)
@@ -358,6 +368,7 @@ class DND_GUI:
 
         result_text = (
             f"Average Damage per Turn: {round(avg_damage, 1)}\n"
+            f"Average Damage on Hit: {round(avg_hit_damage, 1)}\n" 
             f"Number of Hits: {hit_count}\n"
             f"Total Hit Damage: {total_hit_damage}"
         )
@@ -403,10 +414,6 @@ def run_gui():
     root = tk.Tk()
     app = DND_GUI(root)
     root.mainloop()
-
-    #end_time = time.time()
-    #elapsed_time_ms = (end_time - start_time) * 1000  # Convert to milliseconds
-    #print(f"GUI Startup Time: {elapsed_time_ms:.2f} ms")
 
 if __name__ == "__main__":
     run_gui()
