@@ -14,7 +14,6 @@ class Gloomstalker:
     def dreadful_strikes(self, hit, roll, include_crits):
         dread_dmg = 0
         dice_type = 8 if self.ranger_base.level >= 11 else 6
-        print(dice_type)
         if not hit:
             return 0
         elif roll == 20 and include_crits:

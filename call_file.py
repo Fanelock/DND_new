@@ -317,7 +317,7 @@ class DND_GUI:
                 int_mod=abilities['Int'], wis_mod=abilities['Wis'], cha_mod=abilities['Cha'],
                 prof_bonus=prof_bonus,  # Required, no default
                 spell_mod=spell_mod if spell_mod is not None else 0,  # Optional
-                spell_DC=spell_dc if spell_dc is not None else 0  # Optional
+                spell_dc=spell_dc if spell_dc is not None else 0  # Optional
             )
 
             self.create.characters[name] = [new_character]

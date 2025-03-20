@@ -14,7 +14,7 @@ class Create:
         data = pd.read_excel(self.file)
 
         data['Spell_mod'] = data['Spell_mod'].fillna(0).astype(str)
-        data['Spell_DC'] = data['Spell_DC'].fillna(0).astype(str)
+        data['Spell_dc'] = data['Spell_dc'].fillna(0).astype(str)
 
         for _, row in data.iterrows():
             name = row['Name']
