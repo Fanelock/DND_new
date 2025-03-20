@@ -57,11 +57,10 @@ class Rapier(WeaponAttack):
             elif hasattr(self.owner, "primal_strike"):
                 bonus_damage += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
-        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+        if isinstance(self.owner, Ranger) and self.owner.has_gloomstalker() and self.owner.level >= 3:
             p = rd.randint(1, 8)
             if p <= self.owner.wis:
-                bonus_damage += self.owner.dreadful_strikes(hit, roll, include_crits=include_crits)
-            bonus_damage += 0
+                bonus_damage += self.owner.perform_dreadful_strikes(hit, roll, include_crits=include_crits)
 
         return bonus_damage
 

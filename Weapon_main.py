@@ -21,9 +21,9 @@ class WeaponAttack(ABC):
         else:
             self.hit_roll = rd.randint(1, 20)
         if dex:
-            total = (self.hit_roll + self.owner.dex + self.owner.prof + bonus)
+            total = (self.hit_roll + self.owner.dex + self.owner.prof_bonus + bonus)
         else:
-            total = (self.hit_roll + self.owner.str + self.owner.prof + bonus)
+            total = (self.hit_roll + self.owner.str + self.owner.prof_bonus + bonus)
 
         return total >= ac, self.hit_roll, advantage
 

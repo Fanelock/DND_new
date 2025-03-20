@@ -56,10 +56,10 @@ class Dagger(WeaponAttack):
                 self.dmg += sneak_dmg
                 sneak_attack_applied = True
 
-        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+        if isinstance(self.owner, Ranger) and self.owner.has_gloomstalker() and self.owner.level >= 3:
             p = rd.randint(1, 8)
             if p <= self.owner.wis:
-                self.dmg += self.owner.dreadful_strikes(hit, roll, include_crits=include_crits)
+                self.dmg += self.owner.perform_dreadful_strikes(hit, roll, include_crits=include_crits)
             self.dmg += 0
 
         if strike and self.owner.level >= 7:
