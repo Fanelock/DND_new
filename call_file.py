@@ -278,7 +278,6 @@ class DND_GUI:
         self.save_button.pack(pady=20)
 
     def save_new_character(self):
-        """Saves a new character to the system."""
         try:
             name = self.new_name_entry.get().strip()
             class_info = self.new_class_entry.get().strip()
@@ -289,7 +288,6 @@ class DND_GUI:
 
             # Proficiency Bonus (Required)
             prof_bonus_value = self.extra_entries['Prof Bonus'].get().strip()
-            print(f"Saving Proficiency Bonus (raw input): {prof_bonus_value}")
 
             if not prof_bonus_value.isdigit():
                 messagebox.showerror("Error", "Proficiency Bonus is required and must be a number.")
@@ -302,8 +300,6 @@ class DND_GUI:
 
             spell_dc = int(spell_dc_value) if spell_dc_value.isdigit() else None
             spell_mod = int(spell_mod_value) if spell_mod_value.isdigit() else None
-
-            print(f"Saving Spell DC: {spell_dc}, Spell Mod: {spell_mod}")  # Debugging
 
             class_name, class_level = class_info.split(':')
             class_level = int(class_level)
@@ -433,7 +429,6 @@ class DND_GUI:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
     def save_edited_character(self):
-        """Saves the edited character's data with debugging statements."""
         try:
             new_name = self.name_entry.get().strip()
             new_classes = self.class_entry.get().split(',')
