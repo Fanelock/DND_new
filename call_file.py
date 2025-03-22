@@ -46,7 +46,7 @@ class DND_GUI:
         self.create_button = tk.Button(selection_frame, text="Create New Character", command=self.create_character)
         self.create_button.grid(row=0, column=0, padx=10, pady=5)
 
-        self.load_button = tk.Button(selection_frame, text="Load Characters", command=self.load_saved_characters)
+        self.load_button = tk.Button(selection_frame, text="Reload Characters", command=self.load_saved_characters)
         self.load_button.grid(row=0, column=1, padx=10, pady=5)
 
         self.edit_button = tk.Button(selection_frame, text="Edit Character", command=self.edit_character)
@@ -347,6 +347,7 @@ class DND_GUI:
             character = self.create.get_character(selected_character)
 
             if character:
+                self.original_character_name = selected_character
                 self.edit_window = tk.Toplevel(self.master)
                 self.edit_window.title(f"Edit {selected_character}")
                 self.edit_window.geometry("400x450")
@@ -478,8 +479,12 @@ class DND_GUI:
                     raise ValueError(f"Class {class_name} not found.")
 
             self.create.characters[new_name] = new_character
-
             self.create.save_characters()
+
+            if new_name != self.original_character_name:
+                if self.original_character_name in self.create.characters:
+                    del self.create.characters[self.original_character_name]
+                self.create.save_characters()
 
             self.update_character_list()
             messagebox.showinfo("Success", f"Character '{new_name}' updated successfully.")
