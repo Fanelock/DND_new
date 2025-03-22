@@ -31,6 +31,8 @@ class Shortsword(WeaponAttack):
         self.dmg = 0
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
+        advantage = False
+
         hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
         attack_1_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
@@ -55,7 +57,6 @@ class Shortsword(WeaponAttack):
         elif fighting_style != "TWF" and fighting_style:
             fighting_style_dmg += self.fighting_style(hit2, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
 
-
         attack_1_dmg += fighting_style_dmg
         attack_1_dmg += attack_2_dmg
 
@@ -77,7 +78,9 @@ class Shortsword(WeaponAttack):
 
         attack_1_dmg +=  (dread_dmg + primal_dmg + divine_dmg)
         self.dmg = attack_1_dmg
-        self.attack_counter += 1
+
+        if hit:
+            self.attack_counter += 1
 
         return hit, hit2, attack_2_dmg, roll, self.dmg
 

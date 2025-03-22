@@ -38,7 +38,8 @@ class CrossbowHand(WeaponAttack):
                                             include_crits=include_crits)
 
         self.dmg = damage
-        self.attack_counter += 1
+        if hit:
+            self.attack_counter += 1
 
         return hit, roll, self.dmg
 
