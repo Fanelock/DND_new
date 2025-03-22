@@ -80,6 +80,7 @@ class CrossbowHand(WeaponAttack):
 
         for _ in range(num_attacks):
             action_damage = 0
+            use_twf = self.owner.fighting_style == "TWF"
             for _ in range(attacks_per_action):  # Perform multiple attacks in one action
                 hit, roll, damage = self.perform_attack(
                     ac=ac,
@@ -100,6 +101,8 @@ class CrossbowHand(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
+
+                use_twf = False
 
             results.append(action_damage)
             total_damage += action_damage
