@@ -35,7 +35,7 @@ class Dagger(WeaponAttack):
             attack_1_dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
 
         mastery_dmg = 0
-        if mastery and not fighting_style == "TWF":
+        if mastery and not fighting_style == "TWF" and fighting_style != "Dueling":
             mastery_dmg += self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
             if mastery_dmg > 0:
                 mastery_dmg -= (self.owner.dex if dex else self.owner.str)
