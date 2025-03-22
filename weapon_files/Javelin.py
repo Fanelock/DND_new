@@ -9,7 +9,7 @@ class Javelin(WeaponAttack):
         self.number = 1
         self.dice_type = 6
         self.dmg = 0
-        self.supports_sneak_attack = True
+        self.supports_sneak_attack = False
         self.attack_counter = 1
         self.bonus = bonus
 
@@ -90,7 +90,7 @@ class Javelin(WeaponAttack):
             results.append(action_damage)
             total_damage += action_damage
 
-        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        overall_avg_damage = total_damage / num_attacks
         hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

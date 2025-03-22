@@ -16,6 +16,9 @@ class Flintlock(WeaponAttack):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
+        if self.owner == Rogue and advantage == True:
+            sneak_attack = True
+
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
         base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
@@ -91,7 +94,7 @@ class Flintlock(WeaponAttack):
             results.append(action_damage)
             total_damage += action_damage
 
-        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        overall_avg_damage = total_damage / num_attacks
         hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

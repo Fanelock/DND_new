@@ -3,6 +3,11 @@ from ..class_files import SneakAttack
 from ..class_files import Rogue, Ranger, Gloomstalker, Cleric, Paladin, Druid
 import random as rd
 
+### By the grace of God, the Omnissiah or whatever other Deity you believe in, do NOT touch this file
+### it is being held together by hopes, dreams, and the equivalent of duct tape
+### This is one of the two weapon-files which isn't standardized bc of its mastery property (the other being the shortsword)
+### So please, in the name of everything that is holy to you, don't touch this file and don't try to optimize it
+
 class Dagger(WeaponAttack):
     def __init__(self, owner, bonus = 0):
         super().__init__(owner, "Dagger", "Light")
@@ -22,15 +27,18 @@ class Dagger(WeaponAttack):
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus = self.bonus)
         hit2, roll2, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        self.dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus, include_crits = include_crits)
+        self.dmg = 0
+
+        attack_1_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus, include_crits = include_crits)
 
         if hasattr(self, 'fighting_style') and callable(self.fighting_style) and fighting_style != "TWF":
             self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
 
         mastery_dmg = 0
         if mastery:
-            mastery_dmg = self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
-            mastery_dmg -= (self.owner.dex if dex else self.owner.str)
+            mastery_dmg += self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
+            if mastery_dmg > 0:
+                mastery_dmg -= (self.owner.dex if dex else self.owner.str)
 
         twf_dmg = 0
         if hasattr(self, 'fighting_style') and callable(self.fighting_style) and fighting_style == "TWF":
@@ -39,8 +47,10 @@ class Dagger(WeaponAttack):
             if not mastery:
                 twf_dmg = self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
 
-        self.dmg += mastery_dmg
-        self.dmg += twf_dmg
+        attack_1_dmg += mastery_dmg
+        attack_1_dmg += twf_dmg
+
+        self.dmg = attack_1_dmg
 
         if hunters_mark and hit:
             self.dmg += self.owner.perform_huntersmark(hit, roll, include_crits=include_crits)
@@ -51,10 +61,14 @@ class Dagger(WeaponAttack):
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
             sneak_attack_applied = False  # Flag to track if sneak attack has been applied
             #Apply sneak attack only once
-            if not sneak_attack_applied:
+            if not sneak_attack_applied and hit:
                 sneak_dmg = self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
                 self.dmg += sneak_dmg
                 sneak_attack_applied = True
+            elif not sneak_attack_applied and hit2:
+                sneak_dmg_2 = self.owner.perform_sneak_attack(hit2, roll, include_crits=include_crits)
+                self.dmg += sneak_dmg_2
+                mastery_dmg += sneak_dmg_2
 
         if isinstance(self.owner, Ranger) and self.owner.has_gloomstalker() and self.owner.level >= 3:
             p = rd.randint(1, 8)
@@ -68,7 +82,7 @@ class Dagger(WeaponAttack):
             elif hasattr(self.owner, "primal_strike"):
                 self.dmg += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
-        return hit, roll, self.dmg
+        return hit, hit2, roll, mastery_dmg, self.dmg
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
                             include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0, smite=False, strike = False):
@@ -79,13 +93,10 @@ class Dagger(WeaponAttack):
 
         attacks_per_action = 2 if getattr(self.owner, 'has_multiattack', False) else 1
 
-        if mastery or self.owner.fighting_style == "TWF":
-            attacks_per_action += 1
-
         for _ in range(num_attacks):
             action_damage = 0
             for _ in range(attacks_per_action):  # Perform multiple attacks in one action
-                hit, roll, damage = self.perform_attack(
+                hit, hit2, roll, mastery_dmg, damage = self.perform_attack(
                     ac=ac,
                     dex=dex,
                     advantage=advantage,
@@ -104,13 +115,17 @@ class Dagger(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
+                if hit2 and mastery:
+                    hit_count += 1
+                    if not hit:
+                        total_hit_damage += mastery_dmg
 
             # Collect damage results
             results.append(action_damage)
             total_damage += action_damage
 
         # Calculate averages
-        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        overall_avg_damage = total_damage / num_attacks
         hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

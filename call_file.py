@@ -16,6 +16,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import time
+from typing import TYPE_CHECKING
 
 #start_time = time.time()
 
@@ -315,7 +316,7 @@ class DND_GUI:
                 fighting_style=fighting_style,
                 str_mod=abilities['Str'], dex_mod=abilities['Dex'], con_mod=abilities['Con'],
                 int_mod=abilities['Int'], wis_mod=abilities['Wis'], cha_mod=abilities['Cha'],
-                prof_bonus=prof_bonus,  # Required, no default
+                prof_bonus=prof_bonus,
                 spell_mod=spell_mod if spell_mod is not None else 0,  # Optional
                 spell_dc=spell_dc if spell_dc is not None else 0  # Optional
             )
@@ -467,7 +468,7 @@ class DND_GUI:
                         fighting_style=new_fighting_style if i == 0 else None,
                         str_mod=new_abilities['Str'], dex_mod=new_abilities['Dex'], con_mod=new_abilities['Con'],
                         int_mod=new_abilities['Int'], wis_mod=new_abilities['Wis'], cha_mod=new_abilities['Cha'],
-                        prof_bonus=prof_bonus,  # Required, no default
+                        prof_bonus=prof_bonus,
                         spell_mod=spell_mod if spell_mod is not None else 0,  # Optional
                         spell_dc=spell_dc if spell_dc is not None else 0  # Optional
                     )
@@ -679,17 +680,14 @@ class DND_GUI:
             messagebox.showerror("Error", "No damage results to plot.")
             return
 
-        # Create the plot
         fig, ax = plt.subplots()
         ax.hist(damage_results, bins=10, alpha=0.75, color='purple')
         ax.set_title("Damage Distribution")
         ax.set_xlabel("Damage")
         ax.set_ylabel("Frequency")
 
-        # Show the plot
         plt.show(block=False)
 
-        # Position the plot window
         try:
             backend = plt.get_current_fig_manager()
             main_x = self.master.winfo_rootx()

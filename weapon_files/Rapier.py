@@ -49,7 +49,7 @@ class Rapier(WeaponAttack):
             bonus_damage += self.owner.perform_smite(hit, roll, include_crits=include_crits)
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
-            bonus_damage = self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
+            bonus_damage += self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
 
         if strike and self.owner.level >= 7:
             if hasattr(self.owner, "divine_strike"):
@@ -99,7 +99,7 @@ class Rapier(WeaponAttack):
             results.append(action_damage)
             total_damage += action_damage
 
-        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        overall_avg_damage = total_damage / num_attacks
         hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
