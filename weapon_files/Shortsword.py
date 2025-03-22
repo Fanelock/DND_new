@@ -18,7 +18,7 @@ class Shortsword(WeaponAttack):
         self.attack_counter = 1
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite =False, strike = False, include_crits=False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark = False, bonus = 0, smite =False, strike = False, include_crits=False, use_twf = False):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -47,13 +47,14 @@ class Shortsword(WeaponAttack):
         if smite and hit:
             attack_1_dmg += self.owner.perform_smite(hit, roll)
 
-        if fighting_style == "TWF":
+        if fighting_style == "TWF" and use_twf:
             self.dmg = 0
             attack_2_dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex, include_crits=include_crits)
             if hunters_mark and hit2:
                 attack_2_dmg += self.owner.perform_huntersmark(hit2, roll2)
         elif fighting_style != "TWF" and fighting_style:
             fighting_style_dmg += self.fighting_style(hit2, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
+
 
         attack_1_dmg += fighting_style_dmg
         attack_1_dmg += attack_2_dmg
@@ -91,6 +92,7 @@ class Shortsword(WeaponAttack):
 
         for _ in range(num_attacks):
             action_damage = 0
+            use_twf = self.owner.fighting_style == "TWF"
             for _ in range(attacks_per_action):  # Perform multiple attacks in one action
                 hit, hit2, attack_2_dmg, roll, damage = self.perform_attack(
                     ac=ac,
@@ -104,17 +106,19 @@ class Shortsword(WeaponAttack):
                     bonus=bonus,
                     smite=smite,
                     strike=strike,
-                    include_crits=include_crits
+                    include_crits=include_crits,
+                    use_twf=use_twf
                 )
-
                 action_damage += damage
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
-                if hit2:
+                if hit2 and use_twf:
                     hit_count += 1
                     if not hit:
                         total_hit_damage += attack_2_dmg
+
+                use_twf = False
 
             results.append(action_damage)
             total_damage += action_damage

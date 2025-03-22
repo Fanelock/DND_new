@@ -17,7 +17,7 @@ class Dagger(WeaponAttack):
         self.supports_sneak_attack = True
         self.bonus = bonus
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite = False, strike = False, include_crits=False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite = False, strike = False, include_crits=False, use_twf = False):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -32,20 +32,18 @@ class Dagger(WeaponAttack):
         attack_1_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus = self.bonus, include_crits = include_crits)
 
         if hasattr(self, 'fighting_style') and callable(self.fighting_style) and fighting_style != "TWF":
-            self.dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
+            attack_1_dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
 
         mastery_dmg = 0
-        if mastery:
+        if mastery and not fighting_style == "TWF":
             mastery_dmg += self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
             if mastery_dmg > 0:
                 mastery_dmg -= (self.owner.dex if dex else self.owner.str)
 
         twf_dmg = 0
-        if hasattr(self, 'fighting_style') and callable(self.fighting_style) and fighting_style == "TWF":
-            if mastery:
-                mastery_dmg += (self.owner.dex if dex else self.owner.str)
-            if not mastery:
-                twf_dmg = self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
+        if fighting_style == "TWF" and use_twf:
+            self.dmg = 0
+            twf_dmg = self.calc_dmg(hit2, roll2, self.number, self.dice_type, dex, bonus=self.bonus, include_crits = include_crits)
 
         attack_1_dmg += mastery_dmg
         attack_1_dmg += twf_dmg
@@ -82,7 +80,7 @@ class Dagger(WeaponAttack):
             elif hasattr(self.owner, "primal_strike"):
                 self.dmg += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
-        return hit, hit2, roll, mastery_dmg, self.dmg
+        return hit, hit2, roll, mastery_dmg, twf_dmg, self.dmg
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
                             include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0, smite=False, strike = False):
@@ -95,8 +93,9 @@ class Dagger(WeaponAttack):
 
         for _ in range(num_attacks):
             action_damage = 0
+            use_twf = self.owner.fighting_style == "TWF"
             for _ in range(attacks_per_action):  # Perform multiple attacks in one action
-                hit, hit2, roll, mastery_dmg, damage = self.perform_attack(
+                hit, hit2, roll, mastery_dmg, twf_dmg, damage = self.perform_attack(
                     ac=ac,
                     dex=dex,
                     advantage=advantage,
@@ -108,17 +107,24 @@ class Dagger(WeaponAttack):
                     bonus=bonus,
                     smite=smite,
                     strike=strike,
-                    include_crits=include_crits
+                    include_crits=include_crits,
+                    use_twf=use_twf
                 )
 
                 action_damage += damage
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
-                if hit2 and mastery:
+                if hit2 and mastery_dmg > 0:
                     hit_count += 1
                     if not hit:
                         total_hit_damage += mastery_dmg
+                if hit2 and use_twf:
+                    hit_count += 1
+                    if not hit:
+                        total_hit_damage += twf_dmg
+
+                use_twf = False
 
             # Collect damage results
             results.append(action_damage)
