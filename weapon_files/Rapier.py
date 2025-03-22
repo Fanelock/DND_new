@@ -5,7 +5,7 @@ from ..class_files import Ranger, Gloomstalker, Cleric, Paladin, Druid, Rogue, S
 
 class Rapier(WeaponAttack):
     def __init__(self, owner, bonus = 0):
-        super().__init__(owner, "Rapier", "Versatile")
+        super().__init__(owner, "Rapier", "Finesse")
         self.number = 1
         self.dice_type = 8
         self.dmg = 0

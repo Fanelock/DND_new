@@ -5,7 +5,7 @@ import random as rd
 
 class Javelin(WeaponAttack):
     def __init__(self, owner, bonus = 0):
-        super().__init__(owner, "Javelin", "Light")
+        super().__init__(owner, "Javelin", "Thrown")
         self.number = 1
         self.dice_type = 6
         self.dmg = 0

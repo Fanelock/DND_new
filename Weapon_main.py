@@ -68,7 +68,7 @@ class WeaponAttack(ABC):
                     self.dmg = adjusted_dmg
             if style == "Archery" and self.weapon_type == "Ranged" and hit:
                 self.dmg += 2
-            if style == "Dueling" and self.weapon_type in {"Versatile", "Light", "Finesse"} and hit:
+            if style == "Dueling" and self.weapon_type in {"Versatile", "Light", "Finesse", "Meele"} and hit:
                 self.dmg += 2
             if style == "TWF" and self.weapon_type == "Light" and hit:
                 self.dmg = 0
