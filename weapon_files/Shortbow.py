@@ -3,7 +3,6 @@ from ..class_files import Rogue, Ranger, Gloomstalker, Cleric, Paladin, Druid
 from .. import AttackHandler
 import random as rd
 
-
 class Shortbow(WeaponAttack):
     def __init__(self, owner, bonus=0):
         super().__init__(owner, "Shortbow", "Ranged")
@@ -12,11 +11,15 @@ class Shortbow(WeaponAttack):
         self.dmg = 0
         self.supports_sneak_attack = True
         self.bonus = bonus
+        self.attack_counter = 1
 
     def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False,
                         hunters_mark=False, bonus=0, smite=False, strike=False, include_crits=False):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
+
+        if mastery:
+            advantage = self.attack_counter % 2 == 0
 
         if self.owner == Rogue and advantage == True:
             sneak_attack = True
@@ -35,6 +38,7 @@ class Shortbow(WeaponAttack):
                                             include_crits=include_crits)
 
         self.dmg = damage
+        self.attack_counter += 1
 
         return hit, roll, self.dmg
 

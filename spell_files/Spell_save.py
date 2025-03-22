@@ -37,6 +37,7 @@ class SpellSave(Spell):
             if ac > 0:  # Spell Attack
                 hit, roll, damage = self.perform_attack(ac, dice_number, dice_type, advantage, disadvantage, half_dmg, bonus = self.bonus, cantrip_mod = cantrip_mod, include_crits=include_crits)
             elif save_bonus is not None:  # Spell Save
+                ac = 0
                 hit, roll, damage = self.perform_attack(save_bonus, dice_number, dice_type, advantage, disadvantage,
                                     half_dmg, sneak_attack=sneak_attack, hunters_mark=hunters_mark, bonus = self.bonus, smite=smite, cantrip_mod=cantrip_mod, include_crits=include_crits)
             else:

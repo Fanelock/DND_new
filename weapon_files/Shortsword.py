@@ -22,15 +22,16 @@ class Shortsword(WeaponAttack):
         if self.owner == Ranger and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
-        if self.owner == Rogue and advantage == True:
-            sneak_attack = True
-
         if mastery:
             advantage = self.attack_counter % 2 == 0
+
+        if self.owner == Rogue and advantage == True:
+            sneak_attack = True
 
         self.dmg = 0
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
+        hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
         attack_1_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
         attack_2_dmg = 0
@@ -47,12 +48,12 @@ class Shortsword(WeaponAttack):
             attack_1_dmg += self.owner.perform_smite(hit, roll)
 
         if fighting_style == "TWF":
-            hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
-            attack_2_dmg += self.fighting_style(hit2, roll2, self.number, self.dice_type, dex, include_crits=include_crits)
+            self.dmg = 0
+            attack_2_dmg = self.fighting_style(hit2, roll2, self.number, self.dice_type, dex, include_crits=include_crits)
             if hunters_mark and hit2:
                 attack_2_dmg += self.owner.perform_huntersmark(hit2, roll2)
         elif fighting_style != "TWF" and fighting_style:
-            fighting_style_dmg += self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
+            fighting_style_dmg += self.fighting_style(hit2, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
 
         attack_1_dmg += fighting_style_dmg
         attack_1_dmg += attack_2_dmg
@@ -73,13 +74,11 @@ class Shortsword(WeaponAttack):
             elif hasattr(self.owner, "primal_strike"):
                 primal_dmg += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
+        attack_1_dmg +=  (dread_dmg + primal_dmg + divine_dmg)
+        self.dmg = attack_1_dmg
         self.attack_counter += 1
 
-        attack_1_dmg +=  (dread_dmg + primal_dmg + divine_dmg)
-
-        self.dmg = attack_1_dmg
-
-        return hit, roll, self.dmg
+        return hit, hit2, attack_2_dmg, roll, self.dmg
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
                             include_crits=False, sneak_attack=False, hunters_mark=False, bonus=0, smite=False, strike=False):
@@ -89,13 +88,11 @@ class Shortsword(WeaponAttack):
         results = []
 
         attacks_per_action = 2 if getattr(self.owner, 'has_multiattack', False) else 1
-        if self.owner.fighting_style == "TWF":
-            attacks_per_action += 1
 
         for _ in range(num_attacks):
             action_damage = 0
             for _ in range(attacks_per_action):  # Perform multiple attacks in one action
-                hit, roll, damage = self.perform_attack(
+                hit, hit2, attack_2_dmg, roll, damage = self.perform_attack(
                     ac=ac,
                     dex=dex,
                     advantage=advantage,
@@ -114,6 +111,10 @@ class Shortsword(WeaponAttack):
                 if hit:
                     total_hit_damage += damage
                     hit_count += 1
+                if hit2:
+                    hit_count += 1
+                    if not hit:
+                        total_hit_damage += attack_2_dmg
 
             results.append(action_damage)
             total_damage += action_damage

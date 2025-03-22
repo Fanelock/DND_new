@@ -1,4 +1,4 @@
-from DND_weapons import Shortbow
+from DND_weapons import Shortbow, CrossbowHand
 from DND_weapons.weapon_files import Shortsword, Dagger, Greatsword, Longbow, Longsword, Glaive, Flintlock, CrossbowLight, \
                                         CrossbowHeavy, Flail, Warhammer, Javelin, Rapier, Shortbow
 from DND_weapons.spell_files import SpellAttack, SpellSave
@@ -105,14 +105,14 @@ class DND_GUI:
         self.weapon_ranged_var = tk.StringVar(value="None")
         self.weapon_ranged_dropdown = tk.OptionMenu(
             selection_frame, self.weapon_ranged_var, "None", "Shortbow", "Longbow",
-            "Light Crossbow", "Heavy Crossbow", "Flintlock")
+            "Light Crossbow", "Heavy Crossbow", "Flintlock", "Hand Crossbow")
         self.weapon_ranged_dropdown.grid(row=1, column=2, padx=10, pady=5)
 
         self.spell_label = tk.Label(selection_frame, text="Select Spell:")
         self.spell_label.grid(row=0, column=3, padx=10, pady=5)
 
         self.spell_var = tk.StringVar(value="None")
-        self.spell_dropdown = tk.OptionMenu(selection_frame, self.spell_var, "None", "SpellAttack", "SpellSave")
+        self.spell_dropdown = tk.OptionMenu(selection_frame, self.spell_var, "None", "Spell Attack", "Spell Save")
         self.spell_dropdown.grid(row=1, column=3, padx=10, pady=5)
 
         # Parameters frame
@@ -578,7 +578,8 @@ class DND_GUI:
             "Warhammer": lambda owner: Warhammer(owner, bonus),
             "Javelin": lambda owner: Javelin(owner, bonus),
             "Rapier": lambda owner: Rapier(owner, bonus),
-            "Shortbow": lambda owner: Shortbow(owner, bonus)
+            "Shortbow": lambda owner: Shortbow(owner, bonus),
+            "Hand Crossbow": lambda owner: CrossbowHand(owner, bonus)
         }
 
         # Initialize the selected weapon
@@ -618,14 +619,14 @@ class DND_GUI:
     def simulate_spell(self, spell_name):
         bonus = self.get_bonus()
         spell_mapping = {
-            "SpellAttack": lambda owner: SpellAttack(owner, bonus),
-            "SpellSave": lambda owner: SpellSave(owner, bonus)}
+            "Spell Attack": lambda owner: SpellAttack(owner, bonus),
+            "Spell Save": lambda owner: SpellSave(owner, bonus)}
         self.spell = spell_mapping[spell_name](self.character)
 
-        ac = int(self.ac_entry.get())
+        ac = int(self.ac_entry.get()) if spell_name == "Spell Attack" else 0
         dice_number = int(self.dice_number_entry.get())
         dice_type = int(self.dice_type_entry.get())
-        save_bonus = int(self.save_entry.get()) if spell_name == "SpellSave" else None
+        save_bonus = int(self.save_entry.get()) if spell_name == "Spell Save" else None
         half_dmg = self.half_dmg_var.get()
         advantage = self.advantage_var.get()
         disadvantage = self.disadvantage_var.get()
