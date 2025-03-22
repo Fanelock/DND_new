@@ -25,23 +25,26 @@ class Shortsword(WeaponAttack):
         if mastery:
             advantage = self.attack_counter % 2 == 0
 
-        if self.owner == Rogue and advantage == True:
-            sneak_attack = True
-
         self.dmg = 0
+        sneak_dmg = 0
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
+
+        attack_1_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus,
+                                    include_crits=include_crits)
+
+        if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
+            sneak_dmg += self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
+            attack_1_dmg += sneak_dmg
+
         advantage = False
 
         hit2, roll2, advantage2 = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        attack_1_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
         attack_2_dmg = 0
-        fighting_style_dmg = 0
         dread_dmg = 0
         primal_dmg = 0
         divine_dmg = 0
-        sneak_dmg = 0
 
         if hunters_mark and hit:
             attack_1_dmg += self.owner.perform_huntersmark(hit, roll)
@@ -55,14 +58,9 @@ class Shortsword(WeaponAttack):
             if hunters_mark and hit2:
                 attack_2_dmg += self.owner.perform_huntersmark(hit2, roll2)
         elif fighting_style != "TWF" and fighting_style:
-            fighting_style_dmg += self.fighting_style(hit2, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
+            attack_1_dmg = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
 
-        attack_1_dmg += fighting_style_dmg
         attack_1_dmg += attack_2_dmg
-
-        if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
-            sneak_dmg += self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
-            attack_1_dmg += sneak_dmg
 
         if isinstance(self.owner, Ranger) and self.owner.has_gloomstalker() and self.owner.level >= 3:
             p = rd.randint(1, 8)

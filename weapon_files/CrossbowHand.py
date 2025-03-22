@@ -21,9 +21,6 @@ class CrossbowHand(WeaponAttack):
         if mastery:
             advantage = self.attack_counter % 2 == 0
 
-        if self.owner == Rogue and advantage == True:
-            sneak_attack = True
-
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
         base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus,
