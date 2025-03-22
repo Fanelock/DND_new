@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
 from .Smite import Smite
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .Vengeance_subclass import Vengeance
 
 class Paladin(ABC):
-    def __init__(self, level, subclass, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus, spell_mod, spell_DC):
+    def __init__(self, level, subclass, fighting_style, str_mod, dex_mod, con_mod, int_mod, wis_mod, cha_mod, prof_bonus, spell_mod, spell_dc):
         self.level = level
         self.subclass = subclass
         self.fighting_style = fighting_style
@@ -12,9 +16,9 @@ class Paladin(ABC):
         self.int = int_mod
         self.wis = wis_mod
         self.cha = cha_mod
-        self.prof = prof_bonus
+        self.prof_bonus = prof_bonus
         self.spell_mod = spell_mod
-        self.spell_DC = spell_DC
+        self.spell_dc = spell_dc
 
     @property
     def has_multiattack(self):
@@ -26,71 +30,14 @@ class Paladin(ABC):
     def perform_smite(self, hit, roll, include_crits):
         return Smite.smite_dmg(hit, roll, include_crits)
 
+    def has_vengeance(self):
+        return self.subclass == "Vengeance"
+
     def level_up(self):
-        # Check if subclass present
-        if self.level >= 3 and self.subclass and self.__class__ == Paladin:
-            if self.subclass == "Vengeance":
-                from .Vengeance_subclass import Vengeance
-                return Vengeance(
-                    level=self.level,
-                    fighting_style=self.fighting_style,
-                    str_mod=self.str,
-                    dex_mod=self.dex,
-                    con_mod=self.con,
-                    int_mod=self.int,
-                    wis_mod=self.wis,
-                    cha_mod=self.cha,
-                    prof_bonus=self.prof,
-                    spell_mod=self.spell_mod,
-                    spell_DC=self.spell_DC,
-                )
+        self.level += 1
+        print(f"{self.__class__.__name__} has leveled up to level {self.level}!")
+
+        if self.level >= 3 and self.has_vengeance():
+            print(f"{self.__class__.__name__} (Vengeance) gains subclass features at Level {self.level}!")
+
         return self
-
-    def to_dict(self):
-        return {
-            "class_name": self.__class__.__name__,  # Identifies the class type
-            "level": self.level,
-            "subclass": self.subclass,
-            "fighting_style": self.fighting_style,
-            "str_mod": self.str,
-            "dex_mod": self.dex,
-            "con_mod": self.con,
-            "int_mod": self.int,
-            "wis_mod": self.wis,
-            "cha_mod": self.cha,
-            "prof_bonus": self.prof,
-            "spell_mod": self.spell_mod,
-            "spell_DC": self.spell_DC,
-        }
-
-    @classmethod
-    def from_dict(cls, data):
-        if data["class_name"] == "Vengeance":
-            from .Vengeance_subclass import Vengeance
-            return Vengeance(
-                level=data["level"],
-                fighting_style=data["fighting_style"],
-                str_mod=data["str_mod"],
-                dex_mod=data["dex_mod"],
-                con_mod=data["con_mod"],
-                int_mod=data["int_mod"],
-                wis_mod=data["wis_mod"],
-                cha_mod=data["cha_mod"],
-                prof_bonus=data["prof_bonus"],
-                spell_mod=data["spell_mod"],
-                spell_DC=data["spell_DC"],
-            )
-        return cls(
-            level=data["level"],
-            subclass=data.get("subclass"),
-            fighting_style=data.get("fighting_style"),
-            str_mod=data["str_mod"],
-            dex_mod=data["dex_mod"],
-            con_mod=data["con_mod"],
-            int_mod=data["int_mod"],
-            wis_mod=data["wis_mod"],
-            cha_mod=data["cha_mod"],
-            prof_bonus=data["prof_bonus"],
-            spell_mod=data["spell_mod"],
-            spell_DC=data["spell_DC"],
-        )

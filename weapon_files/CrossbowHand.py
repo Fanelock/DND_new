@@ -1,19 +1,20 @@
-import random as rd
-from .. import AttackHandler
 from ..Weapon_main import WeaponAttack
-from ..class_files import Ranger, Gloomstalker, Cleric, Paladin, Druid, Rogue, SneakAttack
+from ..class_files import Rogue, Ranger, Gloomstalker, Cleric, Paladin, Druid
+from .. import AttackHandler
+import random as rd
 
-class Rapier(WeaponAttack):
-    def __init__(self, owner, bonus = 0):
-        super().__init__(owner, "Rapier", "Versatile")
+class CrossbowHand(WeaponAttack):
+    def __init__(self, owner, bonus=0):
+        super().__init__(owner, "Hand Crossbow", "Ranged")
         self.number = 1
-        self.dice_type = 8
+        self.dice_type = 6
         self.dmg = 0
         self.supports_sneak_attack = True
         self.bonus = bonus
         self.attack_counter = 1
 
-    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False, hunters_mark=False, bonus = 0, smite=False, strike=False, include_crits=False):
+    def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False,
+                        hunters_mark=False, bonus=0, smite=False, strike=False, include_crits=False):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
@@ -25,14 +26,16 @@ class Rapier(WeaponAttack):
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
-        base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
+        base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus,
+                                    include_crits=include_crits)
 
         if fighting_style and callable(self.fighting_style):
-            damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
+            damage = self.fighting_style(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus,
+                                            include_crits=include_crits)
         else:
             damage = base_dmg
-
-        damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery, smite, strike, sneak_attack, advantage, include_crits=include_crits)
+        damage += self.apply_bonus_damage(hit, roll, hunters_mark, mastery, smite, strike, sneak_attack, advantage,
+                                            include_crits=include_crits)
 
         self.dmg = damage
         if hit:
@@ -66,7 +69,8 @@ class Rapier(WeaponAttack):
         return bonus_damage
 
     def simulate_attacks(self, ac, num_attacks=10000, dex=False, advantage=False, disadvantage=False, mastery=False,
-                            include_crits=False, sneak_attack = False, hunters_mark=False, bonus=0, smite=False, strike=False):
+                            include_crits=False, sneak_attack=False, hunters_mark=False, bonus=0, smite=False,
+                            strike=False):
         total_damage = 0
         total_hit_damage = 0
         hit_count = 0
@@ -76,6 +80,7 @@ class Rapier(WeaponAttack):
 
         for _ in range(num_attacks):
             action_damage = 0
+            use_twf = self.owner.fighting_style == "TWF"
             for _ in range(attacks_per_action):  # Perform multiple attacks in one action
                 hit, roll, damage = self.perform_attack(
                     ac=ac,
@@ -97,6 +102,8 @@ class Rapier(WeaponAttack):
                     total_hit_damage += damage
                     hit_count += 1
 
+                use_twf = False
+
             results.append(action_damage)
             total_damage += action_damage
 
@@ -106,4 +113,4 @@ class Rapier(WeaponAttack):
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage
 
     def __str__(self):
-        return f"You Longsword deals {self.dmg} damage to the target!"
+        return f"You Longbow deals {self.dmg} damage to the target!"

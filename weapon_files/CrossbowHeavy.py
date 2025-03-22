@@ -17,6 +17,9 @@ class CrossbowHeavy(WeaponAttack):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
 
+        if self.owner == Rogue and advantage == True:
+            sneak_attack = True
+
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
         base_dmg = self.calc_dmg(hit, roll, self.number, self.dice_type, dex, bonus=self.bonus, include_crits=include_crits)
@@ -44,7 +47,7 @@ class CrossbowHeavy(WeaponAttack):
             bonus_damage += self.owner.str
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
-            bonus_damage = self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
+            bonus_damage += self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
 
         if strike and self.owner.level >= 7:
             if hasattr(self.owner, "divine_strike"):
@@ -52,11 +55,10 @@ class CrossbowHeavy(WeaponAttack):
             elif hasattr(self.owner, "primal_strike"):
                 bonus_damage += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
-        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+        if isinstance(self.owner, Ranger) and self.owner.has_gloomstalker() and self.owner.level >= 3:
             p = rd.randint(1, 8)
             if p <= self.owner.wis:
-                bonus_damage += self.owner.dreadful_strikes(hit, roll, include_crits=include_crits)
-            bonus_damage += 0
+                bonus_damage += self.owner.perform_dreadful_strikes(hit, roll, include_crits=include_crits)
 
         return bonus_damage
 
@@ -97,7 +99,7 @@ class CrossbowHeavy(WeaponAttack):
             total_damage += action_damage
 
         # Calculate averages
-        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        overall_avg_damage = total_damage / num_attacks
         hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

@@ -9,7 +9,7 @@ class Javelin(WeaponAttack):
         self.number = 1
         self.dice_type = 6
         self.dmg = 0
-        self.supports_sneak_attack = True
+        self.supports_sneak_attack = False
         self.attack_counter = 1
         self.bonus = bonus
 
@@ -46,11 +46,10 @@ class Javelin(WeaponAttack):
             elif hasattr(self.owner, "primal_strike"):
                 bonus_damage += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
-        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+        if isinstance(self.owner, Ranger) and self.owner.has_gloomstalker() and self.owner.level >= 3:
             p = rd.randint(1, 8)
             if p <= self.owner.wis:
-                bonus_damage += self.owner.dreadful_strikes(hit, roll, include_crits=include_crits)
-            bonus_damage += 0
+                bonus_damage += self.owner.perform_dreadful_strikes(hit, roll, include_crits=include_crits)
 
         return bonus_damage
 
@@ -91,7 +90,7 @@ class Javelin(WeaponAttack):
             results.append(action_damage)
             total_damage += action_damage
 
-        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        overall_avg_damage = total_damage / num_attacks
         hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

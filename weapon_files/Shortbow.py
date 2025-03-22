@@ -3,7 +3,6 @@ from ..class_files import Rogue, Ranger, Gloomstalker, Cleric, Paladin, Druid
 from .. import AttackHandler
 import random as rd
 
-
 class Shortbow(WeaponAttack):
     def __init__(self, owner, bonus=0):
         super().__init__(owner, "Shortbow", "Ranged")
@@ -12,11 +11,18 @@ class Shortbow(WeaponAttack):
         self.dmg = 0
         self.supports_sneak_attack = True
         self.bonus = bonus
+        self.attack_counter = 1
 
     def perform_attack(self, ac, dex, advantage, disadvantage, mastery, fighting_style, sneak_attack=False,
                         hunters_mark=False, bonus=0, smite=False, strike=False, include_crits=False):
         if isinstance(self.owner, Ranger) and self.owner.HuntersmarkAdv(self.owner.level, hunters_mark):
             advantage = True
+
+        if mastery:
+            advantage = self.attack_counter % 2 == 0
+
+        if self.owner == Rogue and advantage == True:
+            sneak_attack = True
 
         hit, roll, advantage = super().attack_roll(ac, dex, advantage, disadvantage, bonus=self.bonus)
 
@@ -32,6 +38,8 @@ class Shortbow(WeaponAttack):
                                             include_crits=include_crits)
 
         self.dmg = damage
+        if hit:
+            self.attack_counter += 1
 
         return hit, roll, self.dmg
 
@@ -45,7 +53,7 @@ class Shortbow(WeaponAttack):
             bonus_damage += self.owner.perform_smite(hit, roll, include_crits=include_crits)
 
         if isinstance(self.owner, Rogue) and (sneak_attack or advantage):
-            bonus_damage = self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
+            bonus_damage += self.owner.perform_sneak_attack(hit, roll, include_crits=include_crits)
 
         if strike and self.owner.level >= 7:
             if hasattr(self.owner, "divine_strike"):
@@ -53,11 +61,10 @@ class Shortbow(WeaponAttack):
             elif hasattr(self.owner, "primal_strike"):
                 bonus_damage += self.owner.primal_strike(hit, roll, include_crits=include_crits)
 
-        if isinstance(self.owner, Gloomstalker) and self.owner.level >= 3:
+        if isinstance(self.owner, Ranger) and self.owner.has_gloomstalker() and self.owner.level >= 3:
             p = rd.randint(1, 8)
             if p <= self.owner.wis:
-                bonus_damage += self.owner.dreadful_strikes(hit, roll, include_crits=include_crits)
-            bonus_damage += 0
+                bonus_damage += self.owner.perform_dreadful_strikes(hit, roll, include_crits=include_crits)
 
         return bonus_damage
 
@@ -97,7 +104,7 @@ class Shortbow(WeaponAttack):
             results.append(action_damage)
             total_damage += action_damage
 
-        overall_avg_damage = total_damage / (num_attacks * attacks_per_action)
+        overall_avg_damage = total_damage / num_attacks
         hit_avg_damage = total_hit_damage / hit_count
 
         return results, overall_avg_damage, hit_avg_damage, hit_count, total_hit_damage

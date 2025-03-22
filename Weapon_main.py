@@ -21,9 +21,9 @@ class WeaponAttack(ABC):
         else:
             self.hit_roll = rd.randint(1, 20)
         if dex:
-            total = (self.hit_roll + self.owner.dex + self.owner.prof + bonus)
+            total = (self.hit_roll + self.owner.dex + self.owner.prof_bonus + bonus)
         else:
-            total = (self.hit_roll + self.owner.str + self.owner.prof + bonus)
+            total = (self.hit_roll + self.owner.str + self.owner.prof_bonus + bonus)
 
         return total >= ac, self.hit_roll, advantage
 
@@ -71,9 +71,18 @@ class WeaponAttack(ABC):
             if style == "Dueling" and self.weapon_type in {"Versatile", "Light", "Finesse"} and hit:
                 self.dmg += 2
             if style == "TWF" and self.weapon_type == "Light" and hit:
-                dmg_roll = rd.randint(1, dice_type)
-                self.dmg += dmg_roll + self.owner.dex if dex else self.owner.str
-                self.dmg += bonus
+                self.dmg = 0
+                dmg_roll = 0
+                if roll == 20 and include_crits:
+                    for _ in range(2 * number):
+                        adjusted_dmg = rd.randint(1, dice_type)
+                        dmg_roll += adjusted_dmg
+                else:
+                    for _ in range(number):
+                        dmg_roll = rd.randint(1, dice_type)
+                dmg_roll += self.owner.dex if dex else self.owner.str
+                dmg_roll += bonus
+                self.dmg = dmg_roll
         return self.dmg
 
     @abstractmethod
