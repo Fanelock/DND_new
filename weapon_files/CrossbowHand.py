@@ -5,7 +5,7 @@ import random as rd
 
 class CrossbowHand(WeaponAttack):
     def __init__(self, owner, bonus=0):
-        super().__init__(owner, "Shortbow", "Ranged")
+        super().__init__(owner, "Hand Crossbow", "Ranged")
         self.number = 1
         self.dice_type = 6
         self.dmg = 0

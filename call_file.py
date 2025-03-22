@@ -96,7 +96,7 @@ class DND_GUI:
 
         self.weapon_var = tk.StringVar(value="None")
         self.weapon_dropdown = tk.OptionMenu(
-            selection_frame, self.weapon_var, "None", "Greatsword", "Shortsword", "Longsword", "Glaive", "Flail", "Warhammer", "Rapier")
+            selection_frame, self.weapon_var, "None", "Flail", "Glaive", "Greatsword", "Longsword", "Rapier", "Shortsword", "Warhammer")
         self.weapon_dropdown.grid(row=1, column=1, padx=10, pady=5)
 
         self.weapon_ranged_label = tk.Label(selection_frame, text="Ranged Weapons:")
@@ -104,8 +104,8 @@ class DND_GUI:
 
         self.weapon_ranged_var = tk.StringVar(value="None")
         self.weapon_ranged_dropdown = tk.OptionMenu(
-            selection_frame, self.weapon_ranged_var, "None", "Shortbow", "Longbow",
-            "Light Crossbow", "Heavy Crossbow", "Flintlock", "Hand Crossbow")
+            selection_frame, self.weapon_ranged_var, "None", "Flintlock", "Hand Crossbow", "Heavy Crossbow",
+            "Light Crossbow", "Longbow", "Shortbow")
         self.weapon_ranged_dropdown.grid(row=1, column=2, padx=10, pady=5)
 
         self.spell_label = tk.Label(selection_frame, text="Select Spell:")
