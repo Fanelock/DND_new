@@ -250,7 +250,7 @@ class DND_GUI:
         self.new_fighting_style_entry.pack(pady=5)
 
         # **3x3 Ability & Bonus Matrix Layout**
-        tk.Label(self.create_window, text="Character Attributes").pack()
+        tk.Label(self.create_window, text="Character Attributes (Modifiers)").pack()
 
         matrix_frame = tk.Frame(self.create_window)
         matrix_frame.pack(pady=10)
@@ -376,7 +376,7 @@ class DND_GUI:
                 self.fighting_style_entry.insert(0, fighting_style_value)
                 self.fighting_style_entry.pack(pady=5)
 
-                tk.Label(self.edit_window, text="Character Attributes").pack()
+                tk.Label(self.edit_window, text="Character Attributes (Modifiers)").pack()
                 matrix_frame = tk.Frame(self.edit_window)
                 matrix_frame.pack(pady=10)
 
@@ -566,8 +566,15 @@ class DND_GUI:
         class_instance = next((cls for cls in self.character if hasattr(cls, 'cha')), None)
 
         if class_instance:
+            # Save original strength value once
+            if not hasattr(class_instance, "_original_str"):
+                class_instance._original_str = class_instance.str
+
+            # Apply Pact Weapon override
             if self.pact_weapon_var.get():
                 class_instance.str = class_instance.cha
+            else:
+                class_instance.str = class_instance._original_str
 
         weapon_mapping = {
             "Greatsword": lambda owner: Greatsword(owner, bonus),
